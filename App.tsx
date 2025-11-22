@@ -12,15 +12,18 @@ import { Toast } from './components/Toast';
 import { Onboarding } from './components/Onboarding';
 import { FocusTimer } from './components/FocusTimer';
 import { useUserStore } from './store/userStore';
+import { useHabitStore } from './store/habitStore';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.DASHBOARD);
   
   const { checkTrial, userProfile } = useUserStore();
+  const { checkDailyReset } = useHabitStore();
 
   // Init User Logic
   useEffect(() => {
     checkTrial();
+    checkDailyReset();
   }, []);
 
   return (

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useHabitStore } from '../store/habitStore';
 import { useUserStore } from '../store/userStore';
 import { useUIStore } from '../store/uiStore';
-import { Plus, Trash2, Edit2, Check, X, Flame, Calendar } from 'lucide-react';
+import { Plus, Trash2, Edit2, Check, X, Flame, Calendar, Share2 } from 'lucide-react';
 import { translations } from '../utils/translations';
 
 export const Habits: React.FC = () => {
@@ -65,6 +65,23 @@ export const Habits: React.FC = () => {
     if (window.confirm(t.confirmDelete)) {
       deleteHabit(id);
       addToast(t.toastDeleted, 'info');
+    }
+  };
+  
+  const handleShare = (habit: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const msg = t.shareMsg.replace('%d', habit.streak.toString()).replace('%s', habit.name);
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'AI-INTIZOM Challenge',
+        text: msg,
+        url: window.location.href // Or Telegram link
+      }).catch(console.error);
+    } else {
+      // Fallback to clipboard
+      navigator.clipboard.writeText(msg);
+      addToast('Link copied! Send to friend.', 'success');
     }
   };
 
@@ -138,13 +155,22 @@ export const Habits: React.FC = () => {
                   ) : (
                     <h3 className="font-bold text-white text-lg leading-tight flex items-center group/title">
                       {habit.name}
-                      <button 
-                        onClick={(e) => startEdit(habit, e)}
-                        className="ml-2 p-1 text-gray-500 hover:text-brand-accent hover:bg-brand-gray/50 rounded transition-all opacity-60 group-hover/title:opacity-100"
-                        title="Edit name"
-                      >
-                        <Edit2 size={14} />
-                      </button>
+                      <div className="flex opacity-0 group-hover/title:opacity-100 transition-opacity ml-2 space-x-1">
+                          <button 
+                            onClick={(e) => startEdit(habit, e)}
+                            className="p-1 text-gray-500 hover:text-brand-accent hover:bg-brand-gray/50 rounded"
+                            title="Edit name"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button 
+                            onClick={(e) => handleShare(habit, e)}
+                            className="p-1 text-gray-500 hover:text-brand-purple hover:bg-brand-gray/50 rounded"
+                            title={t.challengeFriend}
+                          >
+                            <Share2 size={14} />
+                          </button>
+                      </div>
                     </h3>
                   )}
                   <div className="flex items-center text-xs text-gray-400 mt-1 space-x-3">

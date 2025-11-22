@@ -45,7 +45,9 @@ export const translations = {
       toastDeleted: 'Odat o‘chirildi',
       streak: 'kun seriya',
       confirmDelete: 'Odatni o‘chirib tashlamoqchimisiz?',
-      toastUpdated: 'Odat yangilandi'
+      toastUpdated: 'Odat yangilandi',
+      challengeFriend: 'Do\'stni chorlash',
+      shareMsg: 'Men AI-INTIZOM da %s bo\'yicha %d kunlik seriyadaman! Meni yenga olasanmi? 🔥'
     },
     plan: {
       title: 'Maqsadni Aniqlang',
@@ -62,7 +64,18 @@ export const translations = {
       toastError: 'Reja tuzishda xatolik. Internetni tekshiring.',
       day: 'Kun',
       toastAddedToToday: 'Vazifa bugungi rejaga qo‘shildi',
-      quote: '"Intizom — bu nima xohlashingizni hozir nima istayotganingizdan ustun qo‘yishdir."'
+      quote: '"Intizom — bu nima xohlashingizni hozir nima istayotganingizdan ustun qo‘yishdir."',
+      challenges: {
+        title: 'Ommabop Chellenjlar',
+        detox: 'Dopamin Detox',
+        detoxDesc: 'Miyani tozalash va fokusni tiklash.',
+        club: '5:00 Klubi',
+        clubDesc: 'Tonggi baraka va tartib.',
+        coding: 'IT Start',
+        codingDesc: 'Dasturlashni 0 dan boshlash.',
+        fit: 'Fitnes',
+        fitDesc: 'Sog\'lom tana va ruh.'
+      }
     },
     coach: {
       title: 'Intizom Murabbiyi',
@@ -83,7 +96,10 @@ export const translations = {
       confirmReset: 'Haqiqatan ham barcha ma\'lumotlarni o\'chirib tashlamoqchimisiz?',
       free: 'Bepul Tarif',
       premium: 'Premium A',
-      editName: 'Ism'
+      editName: 'Ism',
+      leaderboard: 'Top Intizomlilar',
+      leaderboardSub: 'Eng yaxshi natija ko\'rsatayotgan foydalanuvchilar',
+      you: 'Siz'
     },
     onboarding: {
       langTitle: 'Tilni tanlang / Выберите язык',
@@ -151,7 +167,9 @@ export const translations = {
       toastDeleted: 'Привычка удалена',
       streak: 'дней серия',
       confirmDelete: 'Вы действительно хотите удалить привычку?',
-      toastUpdated: 'Привычка обновлена'
+      toastUpdated: 'Привычка обновлена',
+      challengeFriend: 'Бросить вызов',
+      shareMsg: 'У меня серия %d дней в %s в AI-INTIZOM! Сможешь меня победить? 🔥'
     },
     plan: {
       title: 'Определите Цель',
@@ -168,7 +186,18 @@ export const translations = {
       toastError: 'Ошибка при создании плана. Проверьте интернет.',
       day: 'День',
       toastAddedToToday: 'Задача добавлена в план на сегодня',
-      quote: '"Дисциплина — это решение делать то, что нужно, а не то, что хочется."'
+      quote: '"Дисциплина — это решение делать то, что нужно, а не то, что хочется."',
+      challenges: {
+        title: 'Популярные челленджи',
+        detox: 'Дофаминовое Детокс',
+        detoxDesc: 'Очистка мозга и фокус.',
+        club: 'Клуб 5 утра',
+        clubDesc: 'Утренняя рутина и порядок.',
+        coding: 'IT Старт',
+        codingDesc: 'Программирование с нуля.',
+        fit: 'Фитнес',
+        fitDesc: 'Здоровое тело и дух.'
+      }
     },
     coach: {
       title: 'Тренер Дисциплины',
@@ -189,7 +218,10 @@ export const translations = {
       confirmReset: 'Вы действительно хотите удалить все данные?',
       free: 'Бесплатный',
       premium: 'Premium A',
-      editName: 'Имя'
+      editName: 'Имя',
+      leaderboard: 'Топ по Дисциплине',
+      leaderboardSub: 'Пользователи с лучшими результатами',
+      you: 'Вы'
     },
     onboarding: {
       langTitle: 'Выберите язык / Choose Language',
@@ -257,7 +289,9 @@ export const translations = {
       toastDeleted: 'Habit deleted',
       streak: 'day streak',
       confirmDelete: 'Do you really want to delete this habit?',
-      toastUpdated: 'Habit updated'
+      toastUpdated: 'Habit updated',
+      challengeFriend: 'Challenge Friend',
+      shareMsg: 'I am on a %d day streak in %s on AI-INTIZOM! Can you beat me? 🔥'
     },
     plan: {
       title: 'Define Your Goal',
@@ -274,7 +308,18 @@ export const translations = {
       toastError: 'Error generating plan. Check internet.',
       day: 'Day',
       toastAddedToToday: 'Task added to today\'s plan',
-      quote: '"Discipline is choosing what you want now vs what you want most."'
+      quote: '"Discipline is choosing what you want now vs what you want most."',
+      challenges: {
+        title: 'Popular Challenges',
+        detox: 'Dopamine Detox',
+        detoxDesc: 'Brain reset and focus.',
+        club: '5 AM Club',
+        clubDesc: 'Morning routine mastery.',
+        coding: 'IT Start',
+        codingDesc: 'Coding from zero.',
+        fit: 'Fitness',
+        fitDesc: 'Healthy body and mind.'
+      }
     },
     coach: {
       title: 'Discipline Coach',
@@ -295,7 +340,10 @@ export const translations = {
       confirmReset: 'Do you really want to delete all data?',
       free: 'Free Plan',
       premium: 'Premium A',
-      editName: 'Name'
+      editName: 'Name',
+      leaderboard: 'Discipline Leaderboard',
+      leaderboardSub: 'Top performing users',
+      you: 'You'
     },
     onboarding: {
       langTitle: 'Select Language',

@@ -5,7 +5,7 @@ import { useHabitStore } from '../store/habitStore';
 import { useUIStore } from '../store/uiStore';
 import { 
   Settings, Crown, Shield, ChevronRight, 
-  Bell, Globe, Trash2, Edit2, Check, Flame, Calendar 
+  Bell, Globe, Trash2, Edit2, Check, Flame, Calendar, Trophy, User
 } from 'lucide-react';
 import { translations, Language } from '../utils/translations';
 
@@ -41,6 +41,15 @@ export const Account: React.FC = () => {
     updateProfile({ language: nextLang });
     addToast(nextLang === 'uz' ? "O'zbek tili tanlandi" : nextLang === 'ru' ? "Выбран русский язык" : "English Selected", 'success');
   };
+
+  // Mock Leaderboard Data
+  const leaderboard = [
+    { name: 'Jahongir A.', streak: 45, isPremium: true },
+    { name: 'Malika S.', streak: 42, isPremium: true },
+    { name: userProfile.name, streak: maxStreak, isPremium: userStatus.isPremium, isMe: true },
+    { name: 'Timur K.', streak: 30, isPremium: false },
+    { name: 'Aziza R.', streak: 28, isPremium: false },
+  ].sort((a, b) => b.streak - a.streak); // Sort by streak
 
   return (
     <div className="pb-24 animate-fade-in px-1">
@@ -103,6 +112,45 @@ export const Account: React.FC = () => {
            </div>
            <span className="text-2xl font-bold text-white">{habits.length}</span>
            <span className="text-xs text-gray-500">{t.stats.habits}</span>
+        </div>
+      </div>
+
+      {/* Leaderboard Section */}
+      <div className="bg-brand-dark border border-brand-gray rounded-xl p-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
+           <h3 className="text-md font-bold text-white flex items-center">
+             <Trophy size={18} className="text-yellow-500 mr-2" />
+             {t.leaderboard}
+           </h3>
+           <span className="text-[10px] text-gray-400">{t.leaderboardSub}</span>
+        </div>
+        <div className="space-y-3">
+           {leaderboard.map((user, idx) => (
+             <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${user.isMe ? 'bg-brand-accent/20 border border-brand-accent/30' : 'bg-brand-black/30 border border-brand-gray/30'}`}>
+                <div className="flex items-center space-x-3">
+                   <span className={`font-bold w-5 text-center ${idx < 3 ? 'text-yellow-500' : 'text-gray-500'}`}>#{idx + 1}</span>
+                   <div className="relative">
+                      <div className="w-8 h-8 bg-brand-gray rounded-full flex items-center justify-center">
+                         <User size={16} className="text-gray-400" />
+                      </div>
+                      {user.isPremium && (
+                        <div className="absolute -top-1 -right-1">
+                          <Crown size={10} className="text-yellow-500 fill-yellow-500" />
+                        </div>
+                      )}
+                   </div>
+                   <div>
+                      <p className={`text-sm font-bold ${user.isMe ? 'text-brand-accent' : 'text-white'}`}>
+                        {user.name} {user.isMe && <span className="text-[10px] bg-brand-accent text-white px-1.5 rounded ml-1">{t.you}</span>}
+                      </p>
+                   </div>
+                </div>
+                <div className="flex items-center space-x-1">
+                   <Flame size={14} className="text-brand-warning fill-brand-warning" />
+                   <span className="text-sm font-bold text-white">{user.streak}</span>
+                </div>
+             </div>
+           ))}
         </div>
       </div>
 
@@ -173,7 +221,7 @@ export const Account: React.FC = () => {
       </button>
       
       <div className="text-center mt-6 mb-4">
-         <p className="text-[10px] text-gray-600">AI-INTIZOM v1.3.0</p>
+         <p className="text-[10px] text-gray-600">AI-INTIZOM v1.4.0</p>
       </div>
     </div>
   );
