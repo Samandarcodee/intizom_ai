@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 
 // Ensure API Key is present with safe environment check
@@ -16,7 +17,12 @@ const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
 /**
  * Generates a structured learning/discipline plan based on a user goal in the selected language.
  */
-export const generateDisciplinePlan = async (goal: string, language: 'uz' | 'ru' | 'en' = 'uz', days: number = 7): Promise<any> => {
+export const generateDisciplinePlan = async (
+  goal: string, 
+  language: 'uz' | 'ru' | 'en' = 'uz', 
+  days: number = 7,
+  intensity: 'easy' | 'medium' | 'hard' = 'medium'
+): Promise<any> => {
   // MOCK FALLBACK DATA
   const mockPlanUz = [
     { day: 1, focus: "Asoslarni o'rnatish", tasks: ["Maqsadni aniqlash", "Resurslarni yig'ish", "30 daqiqa o'rganish"] },
@@ -48,8 +54,8 @@ export const generateDisciplinePlan = async (goal: string, language: 'uz' | 'ru'
   if (language === 'ru') langPrompt = "Rus tilida (Russian language)";
   if (language === 'en') langPrompt = "Ingliz tilida (English language)";
 
-  const prompt = `Create a strict ${days}-day discipline plan for the goal: "${goal}". 
-  Focus on small, actionable micro-tasks. 
+  const prompt = `Create a strict ${days}-day discipline plan with ${intensity} intensity for the goal: "${goal}". 
+  Focus on actionable micro-tasks. 
   Return the response strictly in ${langPrompt}.`;
 
   const schema: Schema = {

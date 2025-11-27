@@ -1,3 +1,10 @@
+export enum AppTab {
+  DASHBOARD = 'dashboard',
+  HABITS = 'habits',
+  PLAN = 'plan',
+  COACH = 'coach',
+  ACCOUNT = 'account',
+}
 
 export interface Task {
   id: string;
@@ -17,6 +24,15 @@ export interface Habit {
   streak: number;
   completedToday: boolean;
   history: boolean[]; // Last 7 days
+  type: 'positive' | 'negative'; // positive (build) or negative (break)
+  
+  // Visual and quantitative fields
+  icon?: string; // Emoji
+  color?: string; // 'blue' | 'green' | 'orange' | 'purple' | 'red'
+  targetValue?: number; // e.g. 8 (cups of water)
+  currentValue?: number; // e.g. 3
+  unit?: string; // e.g. 'stakan', 'km', 'bet'
+  dailyMood?: number;
 }
 
 export interface ChatMessage {
@@ -28,7 +44,7 @@ export interface ChatMessage {
 
 export interface UserStatus {
   isPremium: boolean;
-  installDate: number; // Timestamp
+  installDate: number;
 }
 
 export interface UserProfile {
@@ -39,18 +55,10 @@ export interface UserProfile {
   onboardingCompleted: boolean;
 }
 
-export enum AppTab {
-  DASHBOARD = 'dashboard',
-  PLAN = 'plan',
-  COACH = 'coach',
-  HABITS = 'habits',
-  ACCOUNT = 'account'
-}
-
 export type ToastType = 'success' | 'error' | 'info';
 
 export interface ToastMessage {
   id: string;
-  type: ToastType;
   message: string;
+  type: ToastType;
 }

@@ -13,17 +13,18 @@ interface HabitState {
   toggleHabit: (id: string) => void;
   setPlan: (plan: DailyPlan[]) => void;
   toggleTask: (id: string) => void;
-  addHabit: (name: string) => void;
+  addHabit: (name: string, icon?: string, color?: string, targetValue?: number, unit?: string, type?: 'positive' | 'negative') => void;
   updateHabit: (id: string, name: string) => void;
   deleteHabit: (id: string) => void;
   addTask: (title: string) => void;
   deleteTask: (id: string) => void;
+  updatePlanTask: (dayIndex: number, taskIndex: number, newTitle: string) => void;
   checkDailyReset: () => void;
 }
 
 const INITIAL_HABITS: Habit[] = [
-  { id: '1', name: '10 bet kitob o‘qish', streak: 0, completedToday: false, history: [false, false, false, false, false, false, false] },
-  { id: '2', name: 'Shakarsiz kun', streak: 0, completedToday: false, history: [false, false, false, false, false, false, false] },
+  { id: '1', name: '10 bet kitob o‘qish', streak: 0, completedToday: false, history: [false, false, false, false, false, false, false], type: 'positive', icon: '📚', color: 'blue', targetValue: 10, currentValue: 0, unit: 'bet' },
+  { id: '2', name: 'Shakarsiz kun', streak: 0, completedToday: false, history: [false, false, false, false, false, false, false], type: 'negative', icon: '🍬', color: 'red' },
 ];
 
 export const useHabitStore = create<HabitState>()(
@@ -37,9 +38,36 @@ export const useHabitStore = create<HabitState>()(
       toggleHabit: (id) => set((state) => ({
         habits: state.habits.map(h => {
           if (h.id !== id) return h;
+
+          // Numeric Logic
+          if (h.targetValue && h.targetValue > 0) {
+            const currentVal = h.currentValue || 0;
+            let newVal = currentVal + 1;
+            
+            // Loop back to 0 if we exceed target? Or just stay at target?
+            // User might have accidentally clicked too many times. 
+            // Let's implement: If Completed, clicking again resets to 0.
+            if (h.completedToday) {
+               newVal = 0;
+            }
+
+            const isCompleted = newVal >= h.targetValue;
+            
+            // Update history
+            const newHistory = [...h.history];
+            if (newHistory.length > 0) newHistory[0] = isCompleted;
+
+            return {
+              ...h,
+              currentValue: newVal,
+              completedToday: isCompleted,
+              streak: isCompleted && !h.completedToday ? h.streak + 1 : (!isCompleted && h.completedToday ? Math.max(0, h.streak - 1) : h.streak),
+              history: newHistory
+            };
+          }
+
+          // Boolean Logic (Standard)
           const newCompleted = !h.completedToday;
-          
-          // Update history[0] which represents today/current tracking day in this simple visual model
           const newHistory = [...h.history];
           if (newHistory.length > 0) newHistory[0] = newCompleted;
 
@@ -74,13 +102,19 @@ export const useHabitStore = create<HabitState>()(
         )
       })),
 
-      addHabit: (name) => set((state) => ({
+      addHabit: (name, icon, color, targetValue, unit, type = 'positive') => set((state) => ({
         habits: [{
           id: Date.now().toString(),
           name,
           streak: 0,
           completedToday: false,
-          history: [false, false, false, false, false, false, false] 
+          history: [false, false, false, false, false, false, false],
+          icon,
+          color,
+          targetValue,
+          unit,
+          currentValue: 0,
+          type
         }, ...state.habits]
       })),
 
@@ -104,48 +138,40 @@ export const useHabitStore = create<HabitState>()(
         todayTasks: state.todayTasks.filter(t => t.id !== id)
       })),
 
+      updatePlanTask: (dayIndex, taskIndex, newTitle) => set((state) => {
+        const newPlan = [...state.dailyPlan];
+        if (newPlan[dayIndex]) {
+           const newTasks = [...newPlan[dayIndex].tasks];
+           newTasks[taskIndex] = newTitle;
+           newPlan[dayIndex] = { ...newPlan[dayIndex], tasks: newTasks };
+        }
+        return { dailyPlan: newPlan };
+      }),
+
       checkDailyReset: () => {
         const state = get();
         const lastDate = new Date(state.lastOpenDate);
         const now = new Date();
 
-        // Check if it's a different day
         if (lastDate.getDate() !== now.getDate() || lastDate.getMonth() !== now.getMonth() || lastDate.getFullYear() !== now.getFullYear()) {
           
           set({
             lastOpenDate: Date.now(),
-            // Keep uncompleted tasks
             todayTasks: state.todayTasks.filter(t => !t.completed),
             habits: state.habits.map(h => {
-              // Shift history: index 0 was yesterday. 
-              // Current history: [yesterdayStatus, dayBefore, ...]
-              // We shift: [false (new Today), yesterdayStatus, ...].slice(0, 7)
-              
-              // Logic:
-              // 1. `completedToday` was the status for the day that just passed (yesterday).
-              // 2. We push that status to history[0] if we treat history as "Past Days". 
-              // BUT our history visualization uses index 0 as the right-most dot (Today).
-              // To keep it consistent: history array represents [Today/Yesterday, Day-1, Day-2...]
-              // So we shift right.
-              
               const wasCompletedYesterday = h.completedToday;
               const newHistory = [false, h.history[0], h.history[1], h.history[2], h.history[3], h.history[4], h.history[5]];
-              
-              // Streak logic: If not completed yesterday, streak breaks?
-              // If the user didn't open the app yesterday, lastOpenDate would be 2 days ago.
-              // This simple logic assumes daily opening. For robust logic we'd need date diff.
-              // MVP approach: If `completedToday` (which represents yesterday now) was false, reset streak.
               
               return {
                 ...h,
                 completedToday: false,
+                currentValue: 0, // Reset numeric progress
                 streak: wasCompletedYesterday ? h.streak : 0,
                 history: newHistory
               };
             })
           });
         } else {
-           // Same day, just update timestamp
            set({ lastOpenDate: Date.now() });
         }
       }

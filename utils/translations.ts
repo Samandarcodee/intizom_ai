@@ -35,8 +35,15 @@ export const translations = {
     habits: {
       title: 'Mening Odatlarim',
       subtitle: 'Kichik qadamlar katta natijalarga olib keladi.',
-      add: 'Yangi odat nomi',
-      placeholder: 'Masalan: ertalabki yugurish...',
+      add: 'Yangi Odat',
+      nameLabel: 'Nomi',
+      namePlaceholder: 'Masalan: Kitob o\'qish...',
+      settingsLabel: 'Sozlamalar',
+      targetLabel: 'Kunlik Maqsad (Ixtiyoriy)',
+      unitLabel: 'Birlik',
+      unitPlaceholder: 'bet, stakan, km...',
+      iconLabel: 'Belgi',
+      colorLabel: 'Rang',
       empty: 'Hozircha odatlar yo‘q',
       addFirst: 'Birinchi odatni qo‘shish',
       last7days: 'Oxirgi 7 kun',
@@ -47,16 +54,21 @@ export const translations = {
       confirmDelete: 'Odatni o‘chirib tashlamoqchimisiz?',
       toastUpdated: 'Odat yangilandi',
       challengeFriend: 'Do\'stni chorlash',
-      shareMsg: 'Men AI-INTIZOM da %s bo\'yicha %d kunlik seriyadaman! Meni yenga olasanmi? 🔥'
+      shareMsg: 'Men AI-INTIZOM da %s bo\'yicha %d kunlik seriyadaman! Meni yenga olasanmi? 🔥',
+      typeLabel: 'Odat Turi',
+      typePositive: 'Shakllantirish',
+      typeNegative: 'Tashlash (Anti)',
+      typePositiveDesc: 'Yangi foydali odat (Sport, Ilm)',
+      typeNegativeDesc: 'Zararli odatni to\'xtatish (Chekish)',
     },
     plan: {
       title: 'Maqsadni Aniqlang',
-      subtitle: 'Nimalarni o‘rganmoqchi yoki erishmoqchisiz? AI sizga 7 kunlik shaxsiy intizom protokolini tuzib beradi.',
+      subtitle: 'Nimalarni o‘rganmoqchi yoki erishmoqchisiz? AI sizga shaxsiy intizom protokolini tuzib beradi.',
       placeholder: 'Masalan: Python o\'rganish, 5kg vazn tashlash...',
       button: 'Reja Tuzish',
       loading: 'Tizim tahlil qilmoqda...',
       features: { system: 'Tizim', duration: 'Davomiylik', result: 'Natija', durationVal: '7 Kun', resultVal: 'Intizom' },
-      protocol: '7 Kunlik Protokol',
+      protocol: 'Intizom Protokoli',
       addToToday: 'Bugungi vazifalarga qo‘shish',
       added: 'Qo\'shilgan',
       reset: 'Haqiqatan ham joriy rejani o\'chirib, yangisini tuzmoqchimisiz?',
@@ -75,7 +87,18 @@ export const translations = {
         codingDesc: 'Dasturlashni 0 dan boshlash.',
         fit: 'Fitnes',
         fitDesc: 'Sog\'lom tana va ruh.'
-      }
+      },
+      settings: {
+        duration: 'Davomiylik',
+        intensity: 'Qiyinlik',
+        days3: '3 Kun (Sprint)',
+        days7: '7 Kun (Hafta)',
+        days21: '21 Kun (Odat)',
+        easy: 'Yengil',
+        medium: 'O\'rta',
+        hard: 'Sparta (Qiyin)'
+      },
+      editTask: 'Tahrirlash'
     },
     coach: {
       title: 'Intizom Murabbiyi',
@@ -84,7 +107,13 @@ export const translations = {
       welcomeSub: 'Menga maqsadingizni ayting yoki dangasalikni yengish uchun maslahat so\'rang.',
       placeholder: 'Bu yerga yozing...',
       error: 'Xatolik yuz berdi.',
-      clear: 'Tozalash'
+      clear: 'Tozalash',
+      suggestions: [
+        "Dangasalikni qanday yengay?",
+        "Ertalab vaqtli turish sirlari",
+        "Diqqatni jamlash uchun maslahat",
+        "Motivatsiya yo'qoldi, nima qilay?"
+      ]
     },
     account: {
       stats: { daily: 'Kunlik Faollik', streak: 'Eng Uzun Seriya', habits: 'Faol Odatlar' },
@@ -157,8 +186,15 @@ export const translations = {
     habits: {
       title: 'Мои привычки',
       subtitle: 'Маленькие шаги ведут к большим результатам.',
-      add: 'Название привычки',
-      placeholder: 'Например: утренняя пробежка...',
+      add: 'Новая привычка',
+      nameLabel: 'Название',
+      namePlaceholder: 'Например: Утренняя пробежка...',
+      settingsLabel: 'Настройки',
+      targetLabel: 'Цель (Опционально)',
+      unitLabel: 'Единица',
+      unitPlaceholder: 'стр, км, стакан...',
+      iconLabel: 'Иконка',
+      colorLabel: 'Цвет',
       empty: 'Пока нет привычек',
       addFirst: 'Добавить первую привычку',
       last7days: 'Последние 7 дней',
@@ -169,16 +205,21 @@ export const translations = {
       confirmDelete: 'Вы действительно хотите удалить привычку?',
       toastUpdated: 'Привычка обновлена',
       challengeFriend: 'Бросить вызов',
-      shareMsg: 'У меня серия %d дней в %s в AI-INTIZOM! Сможешь меня победить? 🔥'
+      shareMsg: 'У меня серия %d дней в %s в AI-INTIZOM! Сможешь меня победить? 🔥',
+      typeLabel: 'Тип привычки',
+      typePositive: 'Создать',
+      typeNegative: 'Бросить (Анти)',
+      typePositiveDesc: 'Новая полезная привычка (Спорт)',
+      typeNegativeDesc: 'Избавиться от вредной (Курение)',
     },
     plan: {
       title: 'Определите Цель',
-      subtitle: 'Чему вы хотите научиться или достичь? AI создаст для вас 7-дневный протокол дисциплины.',
+      subtitle: 'Чему вы хотите научиться или достичь? AI создаст для вас персональный протокол.',
       placeholder: 'Например: Выучить Python, сбросить 5 кг...',
       button: 'Создать План',
       loading: 'Система анализирует...',
       features: { system: 'Система', duration: 'Длительность', result: 'Результат', durationVal: '7 Дней', resultVal: 'Дисциплина' },
-      protocol: '7-дневный Протокол',
+      protocol: 'Протокол Дисциплины',
       addToToday: 'Добавить в задачи',
       added: 'Добавлено',
       reset: 'Удалить текущий план и создать новый?',
@@ -197,7 +238,18 @@ export const translations = {
         codingDesc: 'Программирование с нуля.',
         fit: 'Фитнес',
         fitDesc: 'Здоровое тело и дух.'
-      }
+      },
+      settings: {
+        duration: 'Длительность',
+        intensity: 'Сложность',
+        days3: '3 Дня (Спринт)',
+        days7: '7 Дней (Неделя)',
+        days21: '21 День (Привычка)',
+        easy: 'Легко',
+        medium: 'Средне',
+        hard: 'Спарта (Сложно)'
+      },
+      editTask: 'Изменить'
     },
     coach: {
       title: 'Тренер Дисциплины',
@@ -206,7 +258,13 @@ export const translations = {
       welcomeSub: 'Скажи мне свою цель или спроси совета, как победить лень.',
       placeholder: 'Напишите здесь...',
       error: 'Произошла ошибка.',
-      clear: 'Очистить'
+      clear: 'Очистить',
+      suggestions: [
+        "Как победить лень?",
+        "Секреты раннего подъема",
+        "Как сфокусироваться?",
+        "Потерял мотивацию, что делать?"
+      ]
     },
     account: {
       stats: { daily: 'Активность', streak: 'Макс. Серия', habits: 'Привычки' },
@@ -279,8 +337,15 @@ export const translations = {
     habits: {
       title: 'My Habits',
       subtitle: 'Small steps lead to big results.',
-      add: 'New Habit Name',
-      placeholder: 'E.g.: Morning jog...',
+      add: 'New Habit',
+      nameLabel: 'Habit Name',
+      namePlaceholder: 'E.g.: Morning jog...',
+      settingsLabel: 'Settings',
+      targetLabel: 'Daily Target (Optional)',
+      unitLabel: 'Unit',
+      unitPlaceholder: 'pages, cups, km...',
+      iconLabel: 'Icon',
+      colorLabel: 'Color',
       empty: 'No habits yet',
       addFirst: 'Add first habit',
       last7days: 'Last 7 days',
@@ -291,16 +356,21 @@ export const translations = {
       confirmDelete: 'Do you really want to delete this habit?',
       toastUpdated: 'Habit updated',
       challengeFriend: 'Challenge Friend',
-      shareMsg: 'I am on a %d day streak in %s on AI-INTIZOM! Can you beat me? 🔥'
+      shareMsg: 'I am on a %d day streak in %s on AI-INTIZOM! Can you beat me? 🔥',
+      typeLabel: 'Habit Type',
+      typePositive: 'Build Habit',
+      typeNegative: 'Break Habit',
+      typePositiveDesc: 'Start something new (Gym, Reading)',
+      typeNegativeDesc: 'Stop something bad (Smoking)',
     },
     plan: {
       title: 'Define Your Goal',
-      subtitle: 'What do you want to learn or achieve? AI will create a 7-day discipline protocol for you.',
+      subtitle: 'What do you want to learn or achieve? AI will create a discipline protocol for you.',
       placeholder: 'E.g.: Learn Python, lose 5kg...',
       button: 'Generate Plan',
       loading: 'System analyzing...',
       features: { system: 'System', duration: 'Duration', result: 'Result', durationVal: '7 Days', resultVal: 'Discipline' },
-      protocol: '7-Day Protocol',
+      protocol: 'Discipline Protocol',
       addToToday: 'Add to today\'s tasks',
       added: 'Added',
       reset: 'Do you really want to delete the current plan?',
@@ -319,7 +389,18 @@ export const translations = {
         codingDesc: 'Coding from zero.',
         fit: 'Fitness',
         fitDesc: 'Healthy body and mind.'
-      }
+      },
+      settings: {
+        duration: 'Duration',
+        intensity: 'Intensity',
+        days3: '3 Days (Sprint)',
+        days7: '7 Days (Week)',
+        days21: '21 Days (Habit)',
+        easy: 'Easy',
+        medium: 'Medium',
+        hard: 'Spartan (Hard)'
+      },
+      editTask: 'Edit'
     },
     coach: {
       title: 'Discipline Coach',
@@ -328,7 +409,13 @@ export const translations = {
       welcomeSub: 'Tell me your goal or ask for advice on how to beat laziness.',
       placeholder: 'Type here...',
       error: 'An error occurred.',
-      clear: 'Clear'
+      clear: 'Clear',
+      suggestions: [
+        "How to beat laziness?",
+        "Secrets of waking up early",
+        "How to improve focus?",
+        "Lost motivation, what to do?"
+      ]
     },
     account: {
       stats: { daily: 'Daily Activity', streak: 'Max Streak', habits: 'Active Habits' },

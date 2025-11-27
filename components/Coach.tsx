@@ -1,10 +1,11 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../types';
 import { chatWithCoach } from '../services/geminiService';
 import { useChatStore } from '../store/chatStore';
 import { useUIStore } from '../store/uiStore';
 import { useUserStore } from '../store/userStore';
-import { Send, Bot, Trash2 } from 'lucide-react';
+import { Send, Bot, Trash2, Sparkles } from 'lucide-react';
 import { translations } from '../utils/translations';
 
 export const Coach: React.FC = () => {
@@ -23,16 +24,15 @@ export const Coach: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [history]);
+  }, [history, isTyping]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
+  const handleSend = async (text: string = input) => {
+    if (!text.trim() || isTyping) return;
 
-    const userText = input;
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
-      text: userText,
+      text: text,
       timestamp: Date.now(),
     };
 
@@ -46,7 +46,7 @@ export const Coach: React.FC = () => {
     }));
 
     try {
-      const responseText = await chatWithCoach(apiHistory, userText, userProfile.language);
+      const responseText = await chatWithCoach(apiHistory, text, userProfile.language);
       
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -61,6 +61,10 @@ export const Coach: React.FC = () => {
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const handleSuggestion = (text: string) => {
+    handleSend(text);
   };
 
   return (
@@ -87,12 +91,26 @@ export const Coach: React.FC = () => {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {history.length === 0 && (
-          <div className="text-center text-gray-500 mt-10 flex flex-col items-center">
+          <div className="text-center text-gray-500 mt-4 flex flex-col items-center">
             <div className="w-16 h-16 bg-brand-gray/30 rounded-full flex items-center justify-center mb-4">
                <Bot size={32} className="text-brand-accent opacity-80" />
             </div>
             <p className="font-medium text-white">{t.welcome}</p>
             <p className="text-xs mt-2 max-w-xs">{t.welcomeSub}</p>
+            
+            {/* Quick Suggestions - Visible only when empty */}
+            <div className="mt-8 w-full max-w-xs space-y-2">
+              {t.suggestions.map((s, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => handleSuggestion(s)}
+                  className="w-full p-3 bg-brand-dark border border-brand-gray rounded-xl text-xs text-left hover:bg-brand-gray hover:text-white transition-colors flex items-center group"
+                >
+                  <Sparkles size={14} className="mr-2 text-brand-accent group-hover:scale-110 transition-transform" />
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {history.map((msg) => (
@@ -134,7 +152,7 @@ export const Coach: React.FC = () => {
             className="flex-1 bg-transparent border-none text-white text-sm p-3 pl-4 focus:ring-0 focus:outline-none placeholder-gray-500"
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={isTyping || !input.trim()}
             className="p-2.5 bg-brand-accent rounded-full text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 m-1"
           >
