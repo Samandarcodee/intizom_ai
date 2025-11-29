@@ -5,7 +5,7 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 let apiKey = '';
 try {
   if (typeof process !== 'undefined' && process.env) {
-    apiKey = process.env.API_KEY || '';
+    apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
   }
 } catch (e) {
   console.warn("Could not access process.env");

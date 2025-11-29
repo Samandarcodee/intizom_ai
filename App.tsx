@@ -13,15 +13,23 @@ import { Onboarding } from './components/Onboarding';
 import { FocusTimer } from './components/FocusTimer';
 import { useUserStore } from './store/userStore';
 import { useHabitStore } from './store/habitStore';
+import { initTelegramWebApp } from './utils/telegram';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.DASHBOARD);
   
-  const { checkTrial, userProfile } = useUserStore();
+  const { checkTrial, userProfile, initFromTelegram } = useUserStore();
   const { checkDailyReset } = useHabitStore();
 
-  // Init User Logic
+  // Init Telegram WebApp and User Logic
   useEffect(() => {
+    // Initialize Telegram WebApp if available
+    initTelegramWebApp();
+    
+    // Initialize user data from Telegram
+    initFromTelegram();
+    
+    // Check trial and daily reset
     checkTrial();
     checkDailyReset();
   }, []);

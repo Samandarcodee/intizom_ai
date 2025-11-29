@@ -1,5 +1,9 @@
 {
   "name": "AI-INTIZOM",
   "description": "Intizom, odatlar va shaxsiy rivojlanish uchun sun'iy intellektga asoslangan Telegram Mini App.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "telegram": {
+    "botUsername": "@intizomAi_bot",
+    "botUrl": "https://t.me/intizomAi_bot"
+  }
 }
