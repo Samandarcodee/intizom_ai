@@ -63,8 +63,8 @@ app.get('*', (req, res) => {
 });
 
 export function startWebServer() {
-  app.listen(PORT, () => {
-    console.log(`🌐 Web App server ishga tushdi: http://localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🌐 Web App server ishga tushdi: http://0.0.0.0:${PORT}`);
     console.log(`📱 Production URL: https://intizomai-production.up.railway.app/`);
   });
 }
