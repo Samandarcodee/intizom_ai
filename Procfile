@@ -1,2 +1,2 @@
-web: npx tsx server/index.ts
+web: npm run build && npx tsx server/index.ts
 
