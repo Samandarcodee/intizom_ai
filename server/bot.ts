@@ -394,32 +394,51 @@ async function processUpdate(update: TelegramUpdate) {
 }
 
 /**
- * Webhook handler for serverless functions
+ * Webhook handler for Express and serverless functions
  */
-export async function webhookHandler(req: IncomingMessage, res: ServerResponse) {
-  if (req.method === 'POST') {
-    let body = '';
+export async function webhookHandler(req: any, res: any) {
+  try {
+    // Handle Express request (already parsed JSON)
+    if (req.body && typeof req.body === 'object') {
+      const update: TelegramUpdate = req.body;
+      await processUpdate(update);
+      res.status(200).json({ ok: true });
+      return;
+    }
     
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
+    // Handle Node.js IncomingMessage (streaming)
+    if (req.method === 'POST') {
+      let body = '';
+      
+      req.on('data', (chunk: Buffer) => {
+        body += chunk.toString();
+      });
 
-    req.on('end', async () => {
-      try {
-        const update: TelegramUpdate = JSON.parse(body);
-        await processUpdate(update);
-        
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ ok: true }));
-      } catch (error) {
-        console.error('❌ Webhook handler xatosi:', error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ ok: false, error: String(error) }));
-      }
-    });
-  } else {
-    res.writeHead(405, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Method not allowed' }));
+      req.on('end', async () => {
+        try {
+          const update: TelegramUpdate = JSON.parse(body);
+          await processUpdate(update);
+          
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: true }));
+        } catch (error) {
+          console.error('❌ Webhook handler xatosi:', error);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: false, error: String(error) }));
+        }
+      });
+    } else {
+      res.writeHead(405, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Method not allowed' }));
+    }
+  } catch (error) {
+    console.error('❌ Webhook handler xatosi:', error);
+    if (res.status) {
+      res.status(500).json({ ok: false, error: String(error) });
+    } else {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: String(error) }));
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import express from 'express';
 import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { webhookHandler } from './bot.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -9,6 +10,10 @@ const rootDir = join(__dirname, '..');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Middleware for parsing JSON (for webhook)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from dist directory (production build)
 const distPath = join(rootDir, 'dist');
@@ -31,6 +36,40 @@ app.get('/health', (req, res) => {
     distPath: distPath,
     timestamp: new Date().toISOString()
   });
+});
+
+// Telegram webhook endpoint
+app.post('/webhook', async (req, res) => {
+  try {
+    // Convert Express request to Node.js IncomingMessage format
+    const mockReq = {
+      method: 'POST',
+      on: (event: string, callback: (chunk?: any) => void) => {
+        if (event === 'data') {
+          callback(JSON.stringify(req.body));
+        } else if (event === 'end') {
+          callback();
+        }
+      }
+    } as any;
+    
+    const mockRes = {
+      writeHead: (status: number, headers: any) => {
+        res.status(status);
+        Object.keys(headers).forEach(key => {
+          res.setHeader(key, headers[key]);
+        });
+      },
+      end: (data: string) => {
+        res.send(data);
+      }
+    } as any;
+    
+    await webhookHandler(mockReq, mockRes);
+  } catch (error) {
+    console.error('❌ Webhook endpoint xatosi:', error);
+    res.status(500).json({ ok: false, error: String(error) });
+  }
 });
 
 // Serve index.html for all routes (SPA support)
@@ -80,9 +119,15 @@ app.get('*', (req, res) => {
 });
 
 export function startWebServer() {
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🌐 Web App server ishga tushdi: http://0.0.0.0:${PORT}`);
-    console.log(`📱 Production URL: https://intizomai-production.up.railway.app/`);
+    console.log(`📱 Webhook URL: http://0.0.0.0:${PORT}/webhook`);
+    if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+      console.log(`🌐 Production URL: https://${process.env.RAILWAY_PUBLIC_DOMAIN}/`);
+      console.log(`📡 Webhook URL: https://${process.env.RAILWAY_PUBLIC_DOMAIN}/webhook`);
+    }
   });
+  
+  return server;
 }
 

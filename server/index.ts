@@ -38,6 +38,14 @@ const env = loadEnv();
 const WEB_APP_URL = env.WEB_APP_URL || process.env.WEB_APP_URL;
 const WEBHOOK_URL = env.WEBHOOK_URL || process.env.WEBHOOK_URL;
 const USE_WEBHOOK = env.USE_WEBHOOK === 'true' || process.env.USE_WEBHOOK === 'true';
+const PORT = process.env.PORT || '3000';
+
+// Auto-detect Railway domain for webhook
+let detectedWebhookUrl = WEBHOOK_URL;
+if (!detectedWebhookUrl && process.env.RAILWAY_PUBLIC_DOMAIN) {
+  detectedWebhookUrl = `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/webhook`;
+  console.log(`🔍 Railway domain aniqlandi: ${detectedWebhookUrl}`);
+}
 
 async function main() {
   // Start Web App server FIRST (so it always works)
