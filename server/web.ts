@@ -15,16 +15,33 @@ const distPath = join(rootDir, 'dist');
 if (existsSync(distPath)) {
   app.use(express.static(distPath));
   console.log('✅ Static files serving from dist/');
+  console.log(`📁 Dist path: ${distPath}`);
 } else {
   console.warn('⚠️  dist/ directory not found. Run "npm run build" first.');
+  console.warn(`📁 Looking for dist at: ${distPath}`);
+  console.warn(`📁 Root directory: ${rootDir}`);
+  console.warn(`📁 Current working directory: ${process.cwd()}`);
 }
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    distExists: existsSync(distPath),
+    distPath: distPath,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Serve index.html for all routes (SPA support)
 app.get('*', (req, res) => {
   const indexPath = join(distPath, 'index.html');
+  console.log(`📄 Request: ${req.path}, checking: ${indexPath}`);
   if (existsSync(indexPath)) {
+    console.log(`✅ Serving index.html from: ${indexPath}`);
     res.sendFile(indexPath);
   } else {
+    console.warn(`❌ index.html not found at: ${indexPath}`);
     res.status(404).send(`
       <!DOCTYPE html>
       <html>
