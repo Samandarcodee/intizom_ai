@@ -1,2 +1,2 @@
-web: npm run build && npx tsx server/index.ts
+web: npm run build && npm run bot
 
