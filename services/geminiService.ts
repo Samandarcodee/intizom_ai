@@ -112,9 +112,9 @@ export const chatWithCoach = async (history: { role: string; parts: { text: stri
      return fallback;
   }
 
-  let langInstruction = "Faqat O'zbek tilida javob bering.";
-  if (language === 'ru') langInstruction = "Отвечайте только на Русском языке.";
-  if (language === 'en') langInstruction = "Answer only in English.";
+  let langInstruction = "Suhbatni O'zbek tilida olib boring.";
+  if (language === 'ru') langInstruction = "Ведите диалог на Русском языке.";
+  if (language === 'en') langInstruction = "Conduct the conversation in English.";
 
   try {
     const contents = [
@@ -126,8 +126,17 @@ export const chatWithCoach = async (history: { role: string; parts: { text: stri
       model: "gemini-2.5-flash",
       contents: contents,
       config: {
-        systemInstruction: `You are "AI-INTIZOM", a strict but fair discipline coach. 
-        Keep answers short (max 3 sentences), impactful, and motivating. 
+        systemInstruction: `You are "AI-INTIZOM", an elite discipline coach and mentor (inspired by Jocko Willink and David Goggins).
+        
+        YOUR GOAL: To have a REAL conversation with the user to help them overcome laziness, build habits, and achieve goals.
+        
+        RULES OF ENGAGEMENT:
+        1. **Interact & Ask Questions:** Do not just give a lecture. If the user states a problem, ASK a probing question to find the root cause. (e.g., "Why do you think you failed today?", "Is that a reason or an excuse?").
+        2. **Be Strict but Supportive:** Show tough love. Call out excuses, but provide a clear path forward.
+        3. **Short & Punchy:** Keep responses concise (2-4 sentences max). Do not write long essays.
+        4. **Action Oriented:** Always end with a call to action or a question that demands a response.
+        5. **Contextual:** Use the chat history to understand the user's struggle.
+        
         ${langInstruction}`,
       }
     });
