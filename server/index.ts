@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { getMe, setMenuButton, startPolling, deleteWebhook, setWebhook } from './bot.js';
+import { startWebServer } from './web.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -49,6 +50,10 @@ async function main() {
   }
 
   console.log(`✅ Bot: @${botInfo.username} (${botInfo.first_name})\n`);
+
+  // Start Web App server
+  console.log('🌐 Web App server ishga tushmoqda...');
+  startWebServer();
 
   // Set menu button (only if HTTPS URL)
   if (WEB_APP_URL) {
