@@ -23,10 +23,7 @@ interface HabitState {
   syncData: (habits: Habit[], tasks: Task[], plan: DailyPlan[]) => void;
 }
 
-const INITIAL_HABITS: Habit[] = [
-  { id: '1', name: '10 bet kitob o‘qish', streak: 0, completedToday: false, history: [false, false, false, false, false, false, false], type: 'positive', icon: '📚', color: 'blue', targetValue: 10, currentValue: 0, unit: 'bet' },
-  { id: '2', name: 'Shakarsiz kun', streak: 0, completedToday: false, history: [false, false, false, false, false, false, false], type: 'negative', icon: '🍬', color: 'red' },
-];
+const INITIAL_HABITS: Habit[] = [];
 
 export const useHabitStore = create<HabitState>()(
   persist(
@@ -36,50 +33,65 @@ export const useHabitStore = create<HabitState>()(
       todayTasks: [],
       lastOpenDate: Date.now(),
 
-      toggleHabit: (id) => set((state) => ({
-        habits: state.habits.map(h => {
-          if (h.id !== id) return h;
+      toggleHabit: async (id) => {
+        // Find habit first to calculate new state
+        const state = get();
+        const habit = state.habits.find(h => h.id === id);
+        if (!habit) return;
 
-          // Numeric Logic
-          if (h.targetValue && h.targetValue > 0) {
-            const currentVal = h.currentValue || 0;
-            let newVal = currentVal + 1;
-            
-            // Loop back to 0 if we exceed target? Or just stay at target?
-            // User might have accidentally clicked too many times. 
-            // Let's implement: If Completed, clicking again resets to 0.
-            if (h.completedToday) {
-               newVal = 0;
-            }
+        // Calculate new values
+        let newVal = (habit.currentValue || 0);
+        let newCompleted = habit.completedToday;
+        let newStreak = habit.streak;
+        
+        // Numeric Logic
+        if (habit.targetValue && habit.targetValue > 0 && habit.type !== 'negative') {
+           newVal = newVal + 1;
+           if (habit.completedToday) {
+              newVal = 0;
+           }
+           newCompleted = newVal >= habit.targetValue;
+           newStreak = newCompleted && !habit.completedToday ? habit.streak + 1 : (!newCompleted && habit.completedToday ? Math.max(0, habit.streak - 1) : habit.streak);
+        } else {
+           // Boolean Logic
+           newCompleted = !habit.completedToday;
+           newStreak = newCompleted ? habit.streak + 1 : Math.max(0, habit.streak - 1);
+        }
 
-            const isCompleted = newVal >= h.targetValue;
+        // Update local state
+        set((state) => ({
+          habits: state.habits.map(h => {
+            if (h.id !== id) return h;
             
-            // Update history
             const newHistory = [...h.history];
-            if (newHistory.length > 0) newHistory[0] = isCompleted;
+            if (newHistory.length > 0) newHistory[0] = newCompleted;
 
             return {
               ...h,
               currentValue: newVal,
-              completedToday: isCompleted,
-              streak: isCompleted && !h.completedToday ? h.streak + 1 : (!isCompleted && h.completedToday ? Math.max(0, h.streak - 1) : h.streak),
+              completedToday: newCompleted,
+              streak: newStreak,
               history: newHistory
             };
-          }
+          })
+        }));
 
-          // Boolean Logic (Standard)
-          const newCompleted = !h.completedToday;
-          const newHistory = [...h.history];
-          if (newHistory.length > 0) newHistory[0] = newCompleted;
-
-          return {
-            ...h,
-            completedToday: newCompleted,
-            streak: newCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
-            history: newHistory
-          };
-        })
-      })),
+        // API Call
+        try {
+          await fetch(`/api/habits/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              completedToday: newCompleted,
+              streak: newStreak,
+              currentValue: newVal,
+              // Also update history array if possible, but server might handle it separately or just push latest status
+            })
+          });
+        } catch (error) {
+          console.error('Failed to toggle habit:', error);
+        }
+      },
 
       setPlan: (plan) => set((state) => {
         let newTasks = [...state.todayTasks];
@@ -97,15 +109,36 @@ export const useHabitStore = create<HabitState>()(
         return { dailyPlan: plan, todayTasks: newTasks };
       }),
 
-      toggleTask: (id) => set((state) => ({
-        todayTasks: state.todayTasks.map(t => 
-          t.id === id ? { ...t, completed: !t.completed } : t
-        )
-      })),
+      toggleTask: async (id) => {
+        const state = get();
+        const task = state.todayTasks.find(t => t.id === id);
+        if (!task) return;
 
-      addHabit: (name, icon, color, targetValue, unit, type = 'positive') => set((state) => ({
-        habits: [{
-          id: Date.now().toString(),
+        const newCompleted = !task.completed;
+
+        set((state) => ({
+          todayTasks: state.todayTasks.map(t => 
+            t.id === id ? { ...t, completed: newCompleted } : t
+          )
+        }));
+
+        // API Call
+        try {
+          await fetch(`/api/tasks/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ completed: newCompleted })
+          });
+        } catch (error) {
+          console.error('Failed to toggle task:', error);
+        }
+      },
+
+      addHabit: async (name, icon, color, targetValue, unit, type = 'positive') => {
+        // Optimistic Update
+        const tempId = Date.now().toString();
+        const newHabit: Habit = {
+          id: tempId,
           name,
           streak: 0,
           completedToday: false,
@@ -116,28 +149,116 @@ export const useHabitStore = create<HabitState>()(
           unit,
           currentValue: 0,
           type
-        }, ...state.habits]
-      })),
+        };
 
-      updateHabit: (id, name) => set((state) => ({
-        habits: state.habits.map(h => h.id === id ? { ...h, name } : h)
-      })),
+        set((state) => ({ habits: [newHabit, ...state.habits] }));
 
-      deleteHabit: (id) => set((state) => ({
-        habits: state.habits.filter(h => h.id !== id)
-      })),
+        // API Call
+        try {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (tgUser) {
+            const response = await fetch('/api/habits', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                telegramId: tgUser.id,
+                ...newHabit
+              })
+            });
+            
+            if (response.ok) {
+              const savedHabit = await response.json();
+              // Replace optimistic habit with real one
+              set((state) => ({
+                habits: state.habits.map(h => h.id === tempId ? savedHabit : h)
+              }));
+            }
+          }
+        } catch (error) {
+          console.error('Failed to save habit:', error);
+        }
+      },
 
-      addTask: (title) => set((state) => ({
-        todayTasks: [...state.todayTasks, {
-          id: Date.now().toString(),
-          title,
-          completed: false
-        }]
-      })),
+      updateHabit: async (id, name) => {
+        set((state) => ({
+          habits: state.habits.map(h => h.id === id ? { ...h, name } : h)
+        }));
 
-      deleteTask: (id) => set((state) => ({
-        todayTasks: state.todayTasks.filter(t => t.id !== id)
-      })),
+        // API Call
+        try {
+          await fetch(`/api/habits/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+          });
+        } catch (error) {
+          console.error('Failed to update habit:', error);
+        }
+      },
+
+      deleteHabit: async (id) => {
+        set((state) => ({
+          habits: state.habits.filter(h => h.id !== id)
+        }));
+
+        // API Call
+        try {
+          await fetch(`/api/habits/${id}`, {
+            method: 'DELETE'
+          });
+        } catch (error) {
+          console.error('Failed to delete habit:', error);
+        }
+      },
+
+      addTask: async (title) => {
+        const tempId = Date.now().toString();
+        set((state) => ({
+          todayTasks: [...state.todayTasks, {
+            id: tempId,
+            title,
+            completed: false
+          }]
+        }));
+
+        // API Call
+        try {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (tgUser) {
+            const response = await fetch('/api/tasks', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                telegramId: tgUser.id,
+                title
+              })
+            });
+
+            if (response.ok) {
+              const savedTask = await response.json();
+              set((state) => ({
+                todayTasks: state.todayTasks.map(t => t.id === tempId ? savedTask : t)
+              }));
+            }
+          }
+        } catch (error) {
+          console.error('Failed to add task:', error);
+        }
+      },
+
+      deleteTask: async (id) => {
+        set((state) => ({
+          todayTasks: state.todayTasks.filter(t => t.id !== id)
+        }));
+
+        try {
+          await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+        } catch (error) {
+          console.error('Failed to delete task:', error);
+        }
+      },
 
       updatePlanTask: (dayIndex, taskIndex, newTitle) => set((state) => {
         const newPlan = [...state.dailyPlan];

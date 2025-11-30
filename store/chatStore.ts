@@ -15,9 +15,31 @@ export const useChatStore = create<ChatState>()(
     (set) => ({
       history: [],
 
-      addMessage: (message) => set((state) => ({ 
-        history: [...state.history, message] 
-      })),
+      addMessage: async (message) => {
+        set((state) => ({ 
+          history: [...state.history, message] 
+        }));
+
+        // API Call
+        try {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (tgUser) {
+            await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                telegramId: tgUser.id,
+                role: message.role,
+                text: message.text,
+                timestamp: message.timestamp
+              })
+            });
+          }
+        } catch (error) {
+          console.error('Failed to save chat message:', error);
+        }
+      },
 
       clearHistory: () => set({ history: [] })
     }),
