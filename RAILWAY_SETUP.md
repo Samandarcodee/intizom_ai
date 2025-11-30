@@ -51,18 +51,19 @@ vite.config.ts
 ### Bizning loyiha uchun Start Command:
 
 ```bash
-npm run build && npm run bot
+npm start
 ```
 
 Yoki:
 
 ```bash
-npm install && npm run build && npm run bot
+npm run bot
 ```
 
 ### Pre-deploy Step (Ixtiyoriy)
 
-Agar pre-deploy step kerak bo'lsa:
+Railway avtomatik ravishda `npm install` va `npm run build` ni bajaradi (Build phase'da).
+Shuning uchun Start Command faqat serverni ishga tushirishi kerak.
 
 1. "Add pre-deploy step" tugmasini bosing
 2. Command kiriting, masalan:
@@ -88,12 +89,12 @@ npm ci
 
 **Start Command:**
 ```
-npm run build && npm run bot
+npm start
 ```
 
 **Pre-deploy Step:**
 ```
-npm install
+(bo'sh qoldiring, Railway avtomatik build qiladi)
 ```
 
 ### Variant 2: Aniq Pattern'lar
@@ -140,17 +141,17 @@ npm ci
 
 ### Start Command:
 ```
-npm run build && npm run bot
+npm start
 ```
 
 ### Pre-deploy Step (ixtiyoriy):
 ```
-npm install
+(kerak emas)
 ```
 
 Bu sozlamalar bilan:
 - ✅ Barcha o'zgarishlar kuzatiladi
-- ✅ Avval build qilinadi
-- ✅ Keyin bot va web server ishga tushadi
+- ✅ Railway avtomatik build qiladi
+- ✅ Keyin server ishga tushadi (Start Command)
 - ✅ Har bir git push'da avtomatik deploy qilinadi
 

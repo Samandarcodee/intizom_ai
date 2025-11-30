@@ -8,112 +8,68 @@
 2. "Start a New Project" tugmasini bosing
 3. GitHub bilan kirib, hisob yarating
 
-### 2. Bot Server ni Deploy Qilish
+### 2. Loyihani Deploy Qilish (Yagona Service)
+
+Bizning loyiha **Monorepo** strukturasida bo'lib, bitta service ham Web App, ham Telegram Bot ni ishga tushiradi.
 
 1. Railway dashboard'da "New Project" > "Deploy from GitHub repo" ni tanlang
 2. `intizom_ai` repozitoriyani tanlang
-3. Railway avtomatik ravishda `server/` papkasini topadi
-
-#### Environment Variables Qo'shish
-
-Railway dashboard'da "Variables" bo'limiga o'ting va quyidagilarni qo'shing:
+3. "Add Variables" bo'limiga o'ting va quyidagilarni qo'shing:
 
 ```bash
-TELEGRAM_BOT_TOKEN=8410285583:AAHmc2-YwK4MtDXzrmYFk-2n79RgtCRvpPE
+TELEGRAM_BOT_TOKEN=your_bot_token_here
 GEMINI_API_KEY=your_gemini_api_key_here
-WEB_APP_URL=https://your-web-app-url.railway.app
+# RAILWAY_PUBLIC_DOMAIN ni Railway avtomatik qo'shadi (agar domain generatsiya qilinsa)
 ```
 
-**Muhim:** `WEB_APP_URL` ni keyinroq Web App deploy qilgandan keyin qo'shing.
+4. **Deploy** tugmasini bosing.
 
-### 3. Web App ni Deploy Qilish
+Railway avtomatik ravishda:
+1. `npm install` qiladi
+2. `npm run build` qiladi (Web va Server ni build qiladi)
+3. `npm start` qiladi (Web server va Bot ni ishga tushiradi)
 
-Web App uchun alohida service yarating:
+### 3. Domain Sozlash
 
-1. Railway project'da "New" > "GitHub Repo" ni tanlang
-2. Xuddi shu repozitoriyani tanlang
-3. Service nomini "web-app" qilib qo'ying
+1. Service settings'da "Networking" ga o'ting.
+2. "Generate Domain" ni bosing (masalan: `ai-intizom-production.up.railway.app`).
+3. Bu domain avtomatik ravishda Web App va Webhook URL sifatida ishlatiladi.
 
-#### Web App Environment Variables
+### 4. Bot Webhook (Avtomatik)
 
-```bash
-GEMINI_API_KEY=your_gemini_api_key_here
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-```
+Bot ishga tushganda, agar `RAILWAY_PUBLIC_DOMAIN` mavjud bo'lsa, u avtomatik ravishda Webhookni o'sha domenga sozlaydi (`https://.../webhook`).
+Siz hech narsa qilishingiz shart emas.
 
-#### Web App Start Command
-
-Service settings'da:
-
-```bash
-Start Command: npm run dev
-```
-
-Yoki production uchun:
-
-```bash
-Start Command: npm run build && npm run preview
-```
-
-### 4. Custom Domain Sozlash (Ixtiyoriy)
-
-1. Railway dashboard'da service'ni tanlang
-2. "Settings" > "Networking" ga o'ting
-3. "Generate Domain" tugmasini bosing
-4. Olingan domain ni `.env` faylida `WEB_APP_URL` ga qo'ying
-
-### 5. Bot Webhook Sozlash
-
-Bot server deploy qilgandan keyin:
-
-1. Railway'da bot service'ning URL ni oling
-2. Webhook URL format: `https://your-bot-service.railway.app/webhook`
-3. `.env` faylida yoki Railway Variables'da:
-   ```bash
-   USE_WEBHOOK=true
-   WEBHOOK_URL=https://your-bot-service.railway.app/webhook
-   ```
-
-**Eslatma:** Hozircha long polling ishlatilmoqda. Webhook uchun webhook handler endpoint yaratish kerak.
-
-### 6. BotFather da Web App URL Sozlash
+### 5. BotFather da Web App URL Sozlash
 
 1. [@BotFather](https://t.me/BotFather) ga o'ting
 2. `/mybots` > `@intizomAi_bot` ni tanlang
 3. "Bot Settings" > "Menu Button" > "Configure Menu Button"
 4. "Web App" ni tanlang
-5. Railway'dan olingan Web App HTTPS URL ni kiriting
+5. Railway'dan olingan Domain URL ni kiriting (masalan: `https://ai-intizom-production.up.railway.app`)
 
-### 7. Test Qilish
+### 6. Test Qilish
 
-1. Telegram'da [@intizomAi_bot](https://t.me/intizomAi_bot) ni oching
-2. `/start` buyrug'ini yuboring
-3. Bot javob berishi kerak
-4. Menu tugmasini bosing - Web App ochilishi kerak
+1. Telegram'da botni oching.
+2. `/start` bosing.
+3. Bot javob beradi va Web App tugmasi chiqadi.
+4. Tugmani bosganda Web App ochilishi kerak.
 
-## Railway Xususiyatlari
+## Muhim Eslatmalar
 
-- ✅ Avtomatik HTTPS sertifikat
-- ✅ Environment variables boshqaruvi
-- ✅ Avtomatik restart
-- ✅ Real-time loglar
-- ✅ Custom domain qo'llab-quvvatlash
-- ✅ Auto-scaling
-- ✅ Monitoring va analytics
+- **Yagona Port:** Railway bitta port (odatda `PORT` env orqali) beradi. Bizning server (`server/index.ts`) shu portda Web App ni ham, Webhook ni ham eshitadi.
+- **Build:** Loyiha `npm run build` orqali `dist` (Frontend) va `server-dist` (Backend) papkalarini yaratadi.
 
 ## Xatoliklar va Yechimlar
 
-### Bot ishlamayapti
+### Web App ochilmayapti (404 yoki Loading)
+- Build jarayoni muvaffaqiyatli o'tganini tekshiring (`dist/index.html` bormi?).
+- Logs da "Static files serving from dist/" xabari chiqdimi?
 
-1. Railway logs'ni tekshiring
-2. Environment variables to'g'ri sozlanganligini tekshiring
-3. Bot token to'g'ri ekanligini tekshiring
+### Bot javob bermayapti
+- `TELEGRAM_BOT_TOKEN` to'g'riligini tekshiring.
+- Logs da "Webhook sozlandi" yoki "Long polling rejimi" yozuvini qidiring.
 
-### Web App ochilmayapti
-
-1. Web App service'ning logs'ni tekshiring
-2. HTTPS URL ishlatilayotganligini tekshiring
-3. BotFather'da URL to'g'ri sozlanganligini tekshiring
 
 ## Qo'shimcha Ma'lumot
 
