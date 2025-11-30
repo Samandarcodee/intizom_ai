@@ -8,6 +8,7 @@ import { Planner } from './components/Planner';
 import { PremiumModal } from './components/PremiumModal';
 import { Account } from './components/Account';
 import { Habits } from './components/Habits';
+import { AdminPanel } from './components/AdminPanel';
 import { Toast } from './components/Toast';
 import { Onboarding } from './components/Onboarding';
 import { FocusTimer } from './components/FocusTimer';
@@ -62,6 +63,10 @@ const App: React.FC = () => {
 
         {activeTab === AppTab.ACCOUNT && (
           <Account />
+        )}
+
+        {activeTab === AppTab.ADMIN && (
+          <AdminPanel />
         )}
       </main>
 

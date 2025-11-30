@@ -213,5 +213,65 @@ router.get('/chat/:telegramId', async (req, res) => {
   }
 });
 
+// --- ADMIN ---
+
+// Admin Stats
+router.get('/admin/stats', async (req, res) => {
+  try {
+    const { telegramId } = req.query;
+    
+    // Security Check (Hardcoded for MVP, ideally use ENV or DB role)
+    const ADMIN_ID = '5928372261'; 
+    if (String(telegramId) !== ADMIN_ID) {
+      return res.status(403).json({ error: 'Access Denied' });
+    }
+
+    // Aggregate Data
+    const totalUsers = await prisma.user.count();
+    
+    // Active users today (users who updated habits or created tasks today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const activeHabits = await prisma.habit.count({
+      where: { updatedAt: { gte: today } }
+    });
+    
+    const totalHabits = await prisma.habit.count();
+    const totalTasksCompleted = await prisma.task.count({ where: { completed: true } });
+
+    // Recent Users List (Last 10)
+    const recentUsers = await prisma.user.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: { habits: true }
+        }
+      }
+    });
+
+    const formattedUsers = recentUsers.map(u => ({
+      id: u.id,
+      telegramId: u.telegramId,
+      name: u.name,
+      createdAt: u.createdAt,
+      habitsCount: u._count.habits
+    }));
+
+    res.json({
+      totalUsers,
+      activeUsersToday: activeHabits, // Proxy metric for now
+      totalHabits,
+      totalTasksCompleted,
+      users: formattedUsers
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: String(e) });
+  }
+});
+
 export default router;
 

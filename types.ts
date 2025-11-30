@@ -4,6 +4,7 @@ export enum AppTab {
   PLAN = 'plan',
   COACH = 'coach',
   ACCOUNT = 'account',
+  ADMIN = 'admin',
 }
 
 export interface Task {
