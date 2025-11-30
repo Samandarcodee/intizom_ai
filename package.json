@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "bot": "node ./server-dist/index.js",
     "bot:dev": "tsx --tsconfig tsconfig.server.json watch server/index.ts",
-    "start": "node ./server-dist/index.js"
+    "start": "npx prisma migrate deploy && node ./server-dist/index.js"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
