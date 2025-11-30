@@ -5,6 +5,10 @@ import { startWebServer } from './web.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url);
@@ -47,7 +51,22 @@ if (!detectedWebhookUrl && process.env.RAILWAY_PUBLIC_DOMAIN) {
   console.log(`🔍 Railway domain aniqlandi: ${detectedWebhookUrl}`);
 }
 
+async function runMigrations() {
+  try {
+    console.log('🔄 Database migratsiyasi boshlanmoqda...');
+    const { stdout, stderr } = await execAsync('npx prisma migrate deploy');
+    console.log('✅ Migratsiya natijasi:', stdout);
+    if (stderr) console.error('⚠️ Migratsiya ogohlantirishi:', stderr);
+  } catch (error) {
+    console.error('❌ Migratsiya xatosi:', error);
+    // Don't exit, maybe tables already exist or we can survive
+  }
+}
+
 async function main() {
+  // Run migrations first
+  await runMigrations();
+
   // Start Web App server FIRST (so it always works)
   console.log('🌐 Web App server ishga tushmoqda...');
   startWebServer();
