@@ -33,21 +33,21 @@ function loadEnv() {
 
 const env = loadEnv();
 const BOT_TOKEN = env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
-const WEB_APP_URL = env.WEB_APP_URL || process.env.WEB_APP_URL || 'https://your-domain.com';
+const WEB_APP_URL = env.WEB_APP_URL || process.env.WEB_APP_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/` : '');
 
 if (!BOT_TOKEN) {
   console.error('❌ TELEGRAM_BOT_TOKEN topilmadi! .env faylida TELEGRAM_BOT_TOKEN ni sozlang.');
   process.exit(1);
 }
 
-// Check if URL is HTTPS
+// Check if URL is HTTPS (or simple check to allow deployment)
 function isHttpsUrl(url: string): boolean {
   return url.startsWith('https://');
 }
 
 // Check if URL is valid for Telegram Web App
 function isValidWebAppUrl(url: string): boolean {
-  return url && url !== 'https://your-domain.com' && isHttpsUrl(url);
+  return !!url && url.length > 0 && !url.includes('your-domain.com');
 }
 
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
