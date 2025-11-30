@@ -33,7 +33,14 @@ function loadEnv() {
 
 const env = loadEnv();
 const BOT_TOKEN = env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
-const WEB_APP_URL = env.WEB_APP_URL || process.env.WEB_APP_URL || (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/` : '');
+// Determine Web App URL
+const RAILWAY_URL = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : '';
+const WEB_APP_URL = RAILWAY_URL || env.WEB_APP_URL || process.env.WEB_APP_URL || '';
+
+// Ensure no trailing slash for consistent comparison
+const CLEAN_APP_URL = WEB_APP_URL.endsWith('/') ? WEB_APP_URL.slice(0, -1) : WEB_APP_URL;
+
+console.log(`🔍 Detected Web App URL: ${CLEAN_APP_URL}`);
 
 if (!BOT_TOKEN) {
   console.error('❌ TELEGRAM_BOT_TOKEN topilmadi! .env faylida TELEGRAM_BOT_TOKEN ni sozlang.');
@@ -198,8 +205,8 @@ async function getMe() {
  */
 async function setMenuButton(chatId?: number) {
   // Only set menu button if URL is HTTPS
-  if (!isValidWebAppUrl(WEB_APP_URL)) {
-    console.warn(`⚠️  Menu button sozlanmaydi: WEB_APP_URL HTTPS bo'lishi kerak (hozir: ${WEB_APP_URL})`);
+  if (!CLEAN_APP_URL || !CLEAN_APP_URL.startsWith('https://')) {
+    console.warn(`⚠️  Menu button sozlanmaydi: WEB_APP_URL HTTPS bo'lishi kerak (hozir: ${CLEAN_APP_URL})`);
     console.warn('💡 Development uchun ngrok yoki localtunnel ishlatishingiz mumkin');
     return { ok: false, skipped: true };
   }
@@ -209,7 +216,7 @@ async function setMenuButton(chatId?: number) {
       type: 'web_app',
       text: '🚀 AI-INTIZOM',
       web_app: {
-        url: WEB_APP_URL,
+        url: CLEAN_APP_URL,
       },
     };
 
@@ -251,34 +258,34 @@ async function handleStart(chatId: number, firstName: string) {
 • Maqsadlar uchun rejalar tuzing
 • Focus timer bilan ehtiyojsiz vaqtni kamaytiring`;
 
-  // Only add Web App button if URL is HTTPS
-  if (isValidWebAppUrl(WEB_APP_URL)) {
-    welcomeMessage += '\n\n🚀 <b>Boshlash uchun</b> quyidagi tugmani bosing:';
-    
-    const keyboard = {
-      inline_keyboard: [
-        [
-          {
-            text: '🚀 AI-INTIZOM ni ochish',
-            web_app: { url: WEB_APP_URL },
-          },
+    // Only add Web App button if we have a valid URL
+    if (CLEAN_APP_URL && CLEAN_APP_URL.startsWith('https://')) {
+      welcomeMessage += '\n\n🚀 <b>Boshlash uchun</b> quyidagi tugmani bosing:';
+      
+      const keyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: '🚀 AI-INTIZOM ni ochish',
+              web_app: { url: CLEAN_APP_URL },
+            },
+          ],
         ],
-      ],
-    };
-
-    await sendMessage(chatId, welcomeMessage, {
-      reply_markup: keyboard,
-      parse_mode: 'HTML',
-    });
-  } else {
-    welcomeMessage += `\n\n⚠️ Web App hozircha mavjud emas (development rejimi).`;
-    welcomeMessage += `\n\n📝 Production deploy qilingandan keyin Web App ishlaydi.`;
-    welcomeMessage += `\n\n🐞 DEBUG: URL=${WEB_APP_URL}`; // Debug info
-    
-    await sendMessage(chatId, welcomeMessage, {
-      parse_mode: 'HTML',
-    });
-  }
+      };
+  
+      await sendMessage(chatId, welcomeMessage, {
+        reply_markup: keyboard,
+        parse_mode: 'HTML',
+      });
+    } else {
+      welcomeMessage += `\n\n⚠️ Web App URL topilmadi yoki HTTPS emas.`;
+      welcomeMessage += `\nURL: '${CLEAN_APP_URL}'`;
+      welcomeMessage += `\nRailway Domain: '${process.env.RAILWAY_PUBLIC_DOMAIN}'`;
+      
+      await sendMessage(chatId, welcomeMessage, {
+        parse_mode: 'HTML',
+      });
+    }
 }
 
 /**
@@ -310,13 +317,13 @@ Savollar bo'lsa, @intizomAi_bot ga yozing!`;
  * Handle /app command
  */
 async function handleApp(chatId: number) {
-  if (isValidWebAppUrl(WEB_APP_URL)) {
+  if (CLEAN_APP_URL && CLEAN_APP_URL.startsWith('https://')) {
     const keyboard = {
       inline_keyboard: [
         [
           {
             text: '🚀 AI-INTIZOM ni ochish',
-            web_app: { url: WEB_APP_URL },
+            web_app: { url: CLEAN_APP_URL },
           },
         ],
       ],
