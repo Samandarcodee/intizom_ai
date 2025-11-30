@@ -273,6 +273,7 @@ async function handleStart(chatId: number, firstName: string) {
   } else {
     welcomeMessage += `\n\n⚠️ Web App hozircha mavjud emas (development rejimi).`;
     welcomeMessage += `\n\n📝 Production deploy qilingandan keyin Web App ishlaydi.`;
+    welcomeMessage += `\n\n🐞 DEBUG: URL=${WEB_APP_URL}`; // Debug info
     
     await sendMessage(chatId, welcomeMessage, {
       parse_mode: 'HTML',
