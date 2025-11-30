@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "bot": "tsx server/index.ts",
-    "bot:dev": "tsx watch server/index.ts",
-    "start": "npm run build && npm run bot"
+    "bot": "tsx ./server/index.ts",
+    "bot:dev": "tsx watch ./server/index.ts",
+    "start": "ls -la && ls -la server && npm run build && npm run bot"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
