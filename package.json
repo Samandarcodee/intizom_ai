@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:web": "vite build",
+    "build:server": "tsc --project tsconfig.server.json",
+    "build": "npm run build:web && npm run build:server",
     "preview": "vite preview",
-    "bot": "tsx ./server/index.ts",
-    "bot:dev": "tsx watch ./server/index.ts",
-    "start": "ls -la && ls -la server && npm run build && npm run bot"
+    "bot": "node ./server-dist/index.js",
+    "bot:dev": "tsx --tsconfig tsconfig.server.json watch server/index.ts",
+    "start": "npm run build && npm run bot"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
