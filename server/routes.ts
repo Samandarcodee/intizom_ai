@@ -56,6 +56,15 @@ router.post('/init', async (req, res) => {
         where: { telegramId: strTelegramId },
         include: { habits: true, tasks: true, dailyPlans: true }
       });
+    } else {
+        // User exists, update info if needed
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                name: [firstName, lastName].filter(Boolean).join(' '),
+                language: languageCode === 'ru' ? 'ru' : (languageCode === 'en' ? 'en' : 'uz'),
+            }
+        });
     }
 
     res.json(user);
