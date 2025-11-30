@@ -239,12 +239,19 @@ router.get('/admin/migrate', async (req, res) => {
     const execAsync = promisify(exec);
     
     console.log('🔄 Manual migration triggered...');
-    const { stdout, stderr } = await execAsync('npx prisma migrate deploy');
+    // Try regular migrate first
+    let result = await execAsync('npx prisma migrate deploy');
+    
+    // If it says "No pending migrations" but tables are missing, we need to push
+    if (result.stdout.includes('No pending migrations')) {
+       console.log('⚠️ Migration says done, but maybe tables missing. Trying db push...');
+       result = await execAsync('npx prisma db push --accept-data-loss');
+    }
     
     res.json({ 
       success: true, 
-      output: stdout, 
-      error: stderr 
+      output: result.stdout, 
+      error: result.stderr 
     });
   } catch (e) {
     res.status(500).json({ error: String(e), stack: (e as Error).stack });
