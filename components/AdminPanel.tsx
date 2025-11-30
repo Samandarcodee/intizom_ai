@@ -68,8 +68,8 @@ export const AdminPanel: React.FC = () => {
   };
 
   if (loading) return <div className="p-8 text-center text-gray-400">Loading Admin Data...</div>;
-  if (error) return <div className="p-8 text-center text-red-500 font-bold">{error}</div>;
-
+  
+  // Even if error, show UI with Fix Button
   return (
     <div className="pb-24 animate-fade-in px-4 pt-4">
       <div className="flex justify-between items-center mb-6">
@@ -79,11 +79,24 @@ export const AdminPanel: React.FC = () => {
         </h1>
         <button 
           onClick={handleMigrate}
-          className="bg-red-500/20 text-red-500 text-[10px] px-2 py-1 rounded border border-red-500/50 hover:bg-red-500/30"
+          className="bg-red-500/20 text-red-500 text-[10px] px-2 py-1 rounded border border-red-500/50 hover:bg-red-500/30 font-bold animate-pulse"
         >
-          Fix DB
+          FIX DATABASE
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl mb-6 text-center">
+          <p className="text-red-500 font-bold mb-2">{error}</p>
+          <p className="text-xs text-gray-400 mb-3">Database tables are missing.</p>
+          <button 
+            onClick={handleMigrate}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm"
+          >
+            RUN MIGRATION NOW
+          </button>
+        </div>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 gap-4 mb-8">
