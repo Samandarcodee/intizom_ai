@@ -1,15 +1,28 @@
 
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 
-// Ensure API Key is present with safe environment check
-let apiKey = '';
-try {
-  if (typeof process !== 'undefined' && process.env) {
-    apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+// Robust API Key detection for both Browser (Vite) and Node.js environments
+const getApiKey = () => {
+  // 1. Try Vite specific env (Browser)
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    if (import.meta.env.VITE_GEMINI_API_KEY) return import.meta.env.VITE_GEMINI_API_KEY;
+    if (import.meta.env.GEMINI_API_KEY) return import.meta.env.GEMINI_API_KEY;
   }
-} catch (e) {
-  console.warn("Could not access process.env");
-}
+  
+  // 2. Try Process env (Node.js / Server)
+  try {
+    if (typeof process !== 'undefined' && process.env) {
+       if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
+       if (process.env.API_KEY) return process.env.API_KEY;
+    }
+  } catch (e) {
+    // Ignore error if process is not defined
+  }
+  
+  return '';
+};
+
+const apiKey = getApiKey();
 
 // Fallback for safety
 const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
