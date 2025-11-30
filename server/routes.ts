@@ -215,6 +215,33 @@ router.get('/chat/:telegramId', async (req, res) => {
 
 // --- ADMIN ---
 
+// Manual Migration Trigger (Emergency only)
+router.get('/admin/migrate', async (req, res) => {
+  const { telegramId } = req.query;
+  const ADMIN_ID = '5928372261'; 
+  
+  if (String(telegramId) !== ADMIN_ID) {
+    return res.status(403).json({ error: 'Access Denied' });
+  }
+
+  try {
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+    
+    console.log('🔄 Manual migration triggered...');
+    const { stdout, stderr } = await execAsync('npx prisma migrate deploy');
+    
+    res.json({ 
+      success: true, 
+      output: stdout, 
+      error: stderr 
+    });
+  } catch (e) {
+    res.status(500).json({ error: String(e), stack: (e as Error).stack });
+  }
+});
+
 // Admin Stats
 router.get('/admin/stats', async (req, res) => {
   try {

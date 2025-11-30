@@ -55,15 +55,35 @@ export const AdminPanel: React.FC = () => {
     fetchStats();
   }, []);
 
+  const handleMigrate = async () => {
+    if (!window.confirm('Are you sure you want to run database migrations manually?')) return;
+    try {
+      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const res = await fetch(`/api/admin/migrate?telegramId=${tgUser?.id}`);
+      const data = await res.json();
+      alert(JSON.stringify(data, null, 2));
+    } catch (e) {
+      alert('Migration failed: ' + e);
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-gray-400">Loading Admin Data...</div>;
   if (error) return <div className="p-8 text-center text-red-500 font-bold">{error}</div>;
 
   return (
     <div className="pb-24 animate-fade-in px-4 pt-4">
-      <h1 className="text-2xl font-bold text-white mb-6 flex items-center">
-        <ShieldCheck size={28} className="text-brand-accent mr-2" />
-        Admin Dashboard
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-white flex items-center">
+          <ShieldCheck size={28} className="text-brand-accent mr-2" />
+          Admin Dashboard
+        </h1>
+        <button 
+          onClick={handleMigrate}
+          className="bg-red-500/20 text-red-500 text-[10px] px-2 py-1 rounded border border-red-500/50 hover:bg-red-500/30"
+        >
+          Fix DB
+        </button>
+      </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 gap-4 mb-8">
