@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { webhookHandler } from './bot.js';
+import apiRoutes from './routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,9 +12,12 @@ const rootDir = join(__dirname, '..');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware for parsing JSON (for webhook)
+// Middleware for parsing JSON (for webhook and API)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// API Routes
+app.use('/api', apiRoutes);
 
 // Serve static files from dist directory (production build)
 const distPath = join(rootDir, 'dist');

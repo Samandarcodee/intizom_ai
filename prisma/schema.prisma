@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  telegramId  String?  @unique
+  name        String?
+  goal        String?
+  language    String   @default("uz")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // User Status
+  isPremium        Boolean  @default(false)
+  installDate      DateTime @default(now())
+  notificationsEnabled Boolean @default(true)
+  onboardingCompleted Boolean @default(false)
+
+  // Relations
+  habits      Habit[]
+  chatHistory ChatMessage[]
+  dailyPlans  DailyPlan[]
+  tasks       Task[]
+}
+
+model Habit {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name           String
+  type           String   @default("positive") // positive, negative
+  icon           String?
+  color          String?
+  
+  streak         Int      @default(0)
+  completedToday Boolean  @default(false)
+  
+  // Numeric tracking
+  targetValue    Int?
+  currentValue   Int?     @default(0)
+  unit           String?
+  
+  // History of last 7 days (stored as boolean array)
+  history        Boolean[]
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model DailyPlan {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  day       Int
+  focus     String
+  tasks     String[] // Simple array of task descriptions
+  
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title     String
+  completed Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role      String   // 'user' | 'model'
+  text      String
+  timestamp DateTime @default(now())
+}

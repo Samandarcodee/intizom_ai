@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { UserStatus, UserProfile } from '../types';
 import { getTelegramUser, getTelegramLanguage, isTelegramWebApp } from '../utils/telegram';
+import { useHabitStore } from './habitStore';
 
 interface UserState {
   userStatus: UserStatus;
@@ -69,7 +70,7 @@ export const useUserStore = create<UserState>()(
         window.location.reload();
       },
 
-      initFromTelegram: () => {
+      initFromTelegram: async () => {
         if (!isTelegramWebApp()) {
           return;
         }
@@ -103,6 +104,48 @@ export const useUserStore = create<UserState>()(
           set((state) => ({
             userProfile: { ...state.userProfile, ...updates }
           }));
+        }
+
+        // SYNC WITH DATABASE (Server)
+        try {
+          const response = await fetch('/api/init', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              telegramId: tgUser.id,
+              firstName: tgUser.first_name,
+              lastName: tgUser.last_name,
+              username: tgUser.username,
+              languageCode: tgUser.language_code
+            })
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            
+            // Sync Habits, Tasks, Plan to HabitStore
+            useHabitStore.getState().syncData(
+              userData.habits || [], 
+              userData.tasks || [], 
+              userData.dailyPlans || []
+            );
+
+            // Update User Store with DB data
+            set((state) => ({
+              userProfile: { 
+                ...state.userProfile, 
+                name: userData.name || state.userProfile.name,
+                goal: userData.goal || state.userProfile.goal,
+                language: (userData.language as any) || state.userProfile.language
+              },
+              userStatus: {
+                ...state.userStatus,
+                isPremium: userData.isPremium || state.userStatus.isPremium
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Failed to sync with server:', error);
         }
       }
     }),

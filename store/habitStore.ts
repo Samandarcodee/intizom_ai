@@ -20,6 +20,7 @@ interface HabitState {
   deleteTask: (id: string) => void;
   updatePlanTask: (dayIndex: number, taskIndex: number, newTitle: string) => void;
   checkDailyReset: () => void;
+  syncData: (habits: Habit[], tasks: Task[], plan: DailyPlan[]) => void;
 }
 
 const INITIAL_HABITS: Habit[] = [
@@ -174,7 +175,13 @@ export const useHabitStore = create<HabitState>()(
         } else {
            set({ lastOpenDate: Date.now() });
         }
-      }
+      },
+
+      syncData: (habits, tasks, plan) => set({
+        habits: habits.length > 0 ? habits : get().habits,
+        todayTasks: tasks.length > 0 ? tasks : get().todayTasks,
+        dailyPlan: plan.length > 0 ? plan : get().dailyPlan
+      })
     }),
     {
       name: 'habit-storage',
