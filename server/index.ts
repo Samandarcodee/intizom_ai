@@ -80,15 +80,21 @@ async function main() {
     }
 
     // Choose webhook or polling
-    if (USE_WEBHOOK && WEBHOOK_URL) {
+    // Agar Railway'da bo'lsa va public domain bor bo'lsa, avtomatik webhook ishlatamiz
+    const shouldUseWebhook = USE_WEBHOOK || (!!detectedWebhookUrl && process.env.RAILWAY_ENVIRONMENT === 'production');
+    const webhookUrlToUse = WEBHOOK_URL || detectedWebhookUrl;
+
+    if (shouldUseWebhook && webhookUrlToUse) {
       console.log('🔗 Webhook rejimi...');
+      console.log(`📡 Webhook URL: ${webhookUrlToUse}`);
       await deleteWebhook(); // Delete old webhook first
-      await setWebhook(WEBHOOK_URL);
+      await setWebhook(webhookUrlToUse);
       console.log('✅ Webhook sozlandi. Bot tayyor!');
-      console.log(`📡 Webhook URL: ${WEBHOOK_URL}`);
     } else {
       console.log('🔄 Long polling rejimi...');
-      console.log('💡 Webhook ishlatish uchun .env faylida USE_WEBHOOK=true va WEBHOOK_URL ni sozlang.\n');
+      console.log('💡 Webhook ishlatish uchun .env faylida USE_WEBHOOK=true va WEBHOOK_URL ni sozlang.');
+      console.log('   Yoki Railway Public Domain yoqing.\n');
+      
       await deleteWebhook(); // Make sure webhook is deleted
       await startPolling();
     }
