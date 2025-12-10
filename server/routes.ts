@@ -13,6 +13,7 @@ router.post('/init', async (req, res) => {
     }
 
     const strTelegramId = String(telegramId);
+    console.log(`Init request from Telegram ID: ${telegramId}`);
 
     // Try to find user
     let user = await prisma.user.findUnique({ 

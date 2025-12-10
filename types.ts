@@ -54,6 +54,7 @@ export interface UserProfile {
   language: 'uz' | 'ru' | 'en';
   notificationsEnabled: boolean;
   onboardingCompleted: boolean;
+  telegramId?: number;
 }
 
 export type ToastType = 'success' | 'error' | 'info';
