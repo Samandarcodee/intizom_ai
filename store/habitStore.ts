@@ -299,9 +299,9 @@ export const useHabitStore = create<HabitState>()(
       },
 
       syncData: (habits, tasks, plan) => set({
-        habits: habits.length > 0 ? habits : get().habits,
-        todayTasks: tasks.length > 0 ? tasks : get().todayTasks,
-        dailyPlan: plan.length > 0 ? plan : get().dailyPlan
+        habits: habits,
+        todayTasks: tasks,
+        dailyPlan: plan
       })
     }),
     {

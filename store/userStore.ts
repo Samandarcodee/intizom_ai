@@ -81,10 +81,21 @@ export const useUserStore = create<UserState>()(
         }
 
         const currentProfile = get().userProfile;
+        
+        // CHECK IF USER CHANGED (Critical for shared devices/accounts)
+        if (currentProfile.telegramId && currentProfile.telegramId !== tgUser.id) {
+           console.log('User changed, resetting data...');
+           localStorage.clear();
+           window.location.reload();
+           return;
+        }
+
         const tgLanguage = getTelegramLanguage();
         
         // Update profile with Telegram data if not already set
-        const updates: Partial<UserProfile> = {};
+        const updates: Partial<UserProfile> = {
+          telegramId: tgUser.id
+        };
         
         if (!currentProfile.name || currentProfile.name === 'Foydalanuvchi') {
           updates.name = tgUser.first_name + (tgUser.last_name ? ` ${tgUser.last_name}` : '');
@@ -124,6 +135,7 @@ export const useUserStore = create<UserState>()(
             const userData = await response.json();
             
             // Sync Habits, Tasks, Plan to HabitStore
+            // IMPORTANT: Always use server data as source of truth
             useHabitStore.getState().syncData(
               userData.habits || [], 
               userData.tasks || [], 
@@ -136,7 +148,8 @@ export const useUserStore = create<UserState>()(
                 ...state.userProfile, 
                 name: userData.name || state.userProfile.name,
                 goal: userData.goal || state.userProfile.goal,
-                language: (userData.language as any) || state.userProfile.language
+                language: (userData.language as any) || state.userProfile.language,
+                telegramId: tgUser.id // Ensure ID is set
               },
               userStatus: {
                 ...state.userStatus,
