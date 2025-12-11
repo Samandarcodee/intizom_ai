@@ -78,18 +78,49 @@ router.post('/init', async (req, res) => {
       });
     } else {
         // User exists, update info if needed
-        await prisma.user.update({
+        user = await prisma.user.update({
             where: { id: user.id },
             data: {
                 name: [firstName, lastName].filter(Boolean).join(' '),
                 language: languageCode === 'ru' ? 'ru' : (languageCode === 'en' ? 'en' : 'uz'),
+            },
+            include: { 
+              habits: { orderBy: { createdAt: 'desc' } }, 
+              tasks: { where: { completed: false }, orderBy: { createdAt: 'desc' } }, 
+              dailyPlans: { orderBy: { day: 'asc' } }
             }
         });
     }
 
-    res.json(user);
+    // Return user with all necessary fields
+    res.json({
+      ...user,
+      onboardingCompleted: user.onboardingCompleted,
+      isPremium: user.isPremium
+    });
   } catch (error) {
     console.error('Init error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// --- USER UPDATE ---
+router.post('/user/onboarding', async (req, res) => {
+  try {
+    const { telegramId, onboardingCompleted } = req.body;
+    
+    if (!telegramId) {
+      return res.status(400).json({ error: 'telegramId is required' });
+    }
+
+    const user = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: { onboardingCompleted: onboardingCompleted === true }
+    });
+
+    res.json({ success: true, onboardingCompleted: user.onboardingCompleted });
+  } catch (error) {
+    console.error('Onboarding update error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
