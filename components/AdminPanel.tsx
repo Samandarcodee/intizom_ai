@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUserStore } from '../store/userStore';
-import { Users, Activity, Calendar, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Users, Activity, Calendar, CheckCircle, ShieldCheck } from 'lucide-react';
 
 interface AdminStats {
   totalUsers: number;
@@ -145,6 +145,4 @@ export const AdminPanel: React.FC = () => {
     </div>
   );
 };
-
-import { ShieldCheck } from 'lucide-react';
 

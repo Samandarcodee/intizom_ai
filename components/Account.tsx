@@ -87,7 +87,10 @@ export const Account: React.FC = () => {
             <Edit2 size={16} className="text-gray-500" />
           </div>
         )}
-        <p className="text-sm text-gray-400 mt-1 font-medium">{userStatus.isPremium ? t.premium : t.free}</p>
+        <p className="text-sm text-brand-success mt-1 font-medium flex items-center justify-center">
+          <Crown size={14} className="mr-1 text-yellow-500" />
+          {t.premium}
+        </p>
       </div>
 
       {/* Stats Grid */}
@@ -194,22 +197,7 @@ export const Account: React.FC = () => {
           </button>
       </div>
 
-      {/* Premium Banner if Free */}
-      {!userStatus.isPremium && (
-        <div className="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl p-4 mb-6 flex items-center justify-between shadow-lg relative overflow-hidden group cursor-pointer">
-          <div className="absolute top-0 left-0 w-full h-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="flex items-center space-x-3 relative z-10">
-             <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-               <Crown size={20} className="text-white" />
-             </div>
-             <div>
-               <h3 className="font-bold text-white text-sm">{t.premiumBanner}</h3>
-               <p className="text-[10px] text-white/80">{t.premiumSub}</p>
-             </div>
-          </div>
-          <ChevronRight className="text-white relative z-10" />
-        </div>
-      )}
+      {/* Premium features available for everyone */}
 
       {/* Danger Zone */}
       <button 

@@ -16,8 +16,8 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  // User Status
-  isPremium        Boolean  @default(false)
+  // User Status - Premium is free for everyone
+  isPremium        Boolean  @default(true)
   installDate      DateTime @default(now())
   notificationsEnabled Boolean @default(true)
   onboardingCompleted Boolean @default(false)

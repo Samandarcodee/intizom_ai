@@ -4,7 +4,7 @@ import { useHabitStore } from '../store/habitStore';
 import { useUserStore } from '../store/userStore';
 import { useUIStore } from '../store/uiStore';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import { Flame, Crown, Clock, Zap, Star, Check, Trash2, Timer } from 'lucide-react';
+import { Flame, Crown, Zap, Star, Check, Trash2, Timer, Clock } from 'lucide-react';
 import { translations } from '../utils/translations';
 
 export const Dashboard: React.FC = () => {
@@ -16,7 +16,6 @@ export const Dashboard: React.FC = () => {
 
   const completedHabits = habits.filter(h => h.completedToday).length;
   const habitPercentage = habits.length > 0 ? Math.round((completedHabits / habits.length) * 100) : 0;
-  const daysLeft = 7 - daysUsed;
 
   const handleTaskToggle = (id: string) => {
     toggleTask(id);
@@ -46,24 +45,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Trial Banner */}
-      {!userStatus.isPremium && (
-        <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 rounded-xl border border-brand-gray flex items-center justify-between shadow-lg relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-yellow-500/10 blur-2xl rounded-full -mr-8 -mt-8 group-hover:bg-yellow-500/20 transition-all"></div>
-          <div className="flex items-center space-x-3 relative z-10">
-            <div className="bg-brand-warning/10 p-2 rounded-full">
-              <Clock size={20} className="text-brand-warning" />
-            </div>
-            <div>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">{t.trial}</p>
-              <p className="text-sm font-bold text-white">{daysLeft > 0 ? `${daysLeft} ${t.daysLeft}` : t.expired}</p>
-            </div>
-          </div>
-          <button className="text-xs bg-brand-warning hover:bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold transition-colors shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-            {t.getPremium}
-          </button>
-        </div>
-      )}
+      {/* Premium features are available for everyone - no trial banner needed */}
 
       {/* Progress Card & Focus Button */}
       <div className="grid grid-cols-3 gap-3">

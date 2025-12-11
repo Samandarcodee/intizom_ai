@@ -36,6 +36,8 @@ declare global {
         headerColor: string;
         backgroundColor: string;
         isClosingConfirmationEnabled: boolean;
+        enableClosingConfirmation: () => void;
+        disableClosingConfirmation: () => void;
         BackButton: {
           isVisible: boolean;
           onClick: (callback: () => void) => void;
