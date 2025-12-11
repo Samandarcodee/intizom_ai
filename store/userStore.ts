@@ -8,6 +8,7 @@ import { useHabitStore } from './habitStore';
 interface UserState {
   userStatus: UserStatus;
   userProfile: UserProfile;
+  telegramId: string | null;
   daysUsed: number;
   showPaywall: boolean;
   
@@ -35,6 +36,7 @@ export const useUserStore = create<UserState>()(
     (set, get) => ({
       userStatus: INITIAL_STATUS,
       userProfile: INITIAL_PROFILE,
+      telegramId: null,
       daysUsed: 1,
       showPaywall: false,
 
@@ -61,9 +63,25 @@ export const useUserStore = create<UserState>()(
         userProfile: { ...state.userProfile, ...updates }
       })),
 
-      completeOnboarding: () => set((state) => ({
-        userProfile: { ...state.userProfile, onboardingCompleted: true }
-      })),
+      completeOnboarding: async () => {
+        set((state) => ({
+          userProfile: { ...state.userProfile, onboardingCompleted: true }
+        }));
+        
+        // Save to server
+        const telegramId = get().telegramId;
+        if (telegramId) {
+          try {
+            await fetch('/api/user/onboarding', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ telegramId, onboardingCompleted: true })
+            });
+          } catch (error) {
+            console.error('Failed to save onboarding status:', error);
+          }
+        }
+      },
 
       resetData: () => {
         localStorage.clear();
@@ -80,10 +98,31 @@ export const useUserStore = create<UserState>()(
           return;
         }
 
+        const currentTelegramId = get().telegramId;
+        const newTelegramId = String(tgUser.id);
+        
+        // Check if different user - clear old data!
+        if (currentTelegramId && currentTelegramId !== newTelegramId) {
+          console.log(`🔄 User changed from ${currentTelegramId} to ${newTelegramId}, clearing old data...`);
+          // Reset to initial state for new user
+          set({
+            userStatus: INITIAL_STATUS,
+            userProfile: INITIAL_PROFILE,
+            telegramId: newTelegramId,
+            daysUsed: 1,
+            showPaywall: false
+          });
+          // Also clear habit store
+          useHabitStore.getState().syncData([], [], []);
+        } else {
+          // Set telegramId if not set
+          set({ telegramId: newTelegramId });
+        }
+
         const currentProfile = get().userProfile;
         const tgLanguage = getTelegramLanguage();
         
-        // Update profile with Telegram data if not already set
+        // Update profile with Telegram data
         const updates: Partial<UserProfile> = {};
         
         if (!currentProfile.name || currentProfile.name === 'Foydalanuvchi') {
@@ -106,7 +145,7 @@ export const useUserStore = create<UserState>()(
           }));
         }
 
-        // SYNC WITH DATABASE (Server)
+        // SYNC WITH DATABASE (Server) - Server data is the source of truth!
         try {
           const response = await fetch('/api/init', {
             method: 'POST',
@@ -123,20 +162,22 @@ export const useUserStore = create<UserState>()(
           if (response.ok) {
             const userData = await response.json();
             
-            // Sync Habits, Tasks, Plan to HabitStore
+            // Sync Habits, Tasks, Plan from SERVER (overwrite local!)
             useHabitStore.getState().syncData(
               userData.habits || [], 
               userData.tasks || [], 
               userData.dailyPlans || []
             );
 
-            // Update User Store with DB data
+            // Update User Store with DB data (server is source of truth)
             set((state) => ({
+              telegramId: newTelegramId,
               userProfile: { 
                 ...state.userProfile, 
                 name: userData.name || state.userProfile.name,
                 goal: userData.goal || state.userProfile.goal,
-                language: (userData.language as any) || state.userProfile.language
+                language: (userData.language as any) || state.userProfile.language,
+                onboardingCompleted: userData.onboardingCompleted ?? state.userProfile.onboardingCompleted
               },
               userStatus: {
                 ...state.userStatus,
@@ -154,7 +195,8 @@ export const useUserStore = create<UserState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ 
         userStatus: state.userStatus,
-        userProfile: state.userProfile 
+        userProfile: state.userProfile,
+        telegramId: state.telegramId
       }),
     }
   )
