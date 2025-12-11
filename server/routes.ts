@@ -3,6 +3,28 @@ import { prisma } from './db.js';
 
 const router = express.Router();
 
+// Default habits based on language
+function getDefaultHabits(languageCode: string) {
+  const lang = languageCode === 'ru' ? 'ru' : (languageCode === 'en' ? 'en' : 'uz');
+  
+  if (lang === 'ru') {
+    return [
+      { name: 'Читать 10 страниц', type: 'positive', icon: '📚', color: 'blue', targetValue: 10, unit: 'стр' },
+      { name: 'День без сахара', type: 'negative', icon: '🍬', color: 'red' }
+    ];
+  } else if (lang === 'en') {
+    return [
+      { name: 'Read 10 pages', type: 'positive', icon: '📚', color: 'blue', targetValue: 10, unit: 'pages' },
+      { name: 'Sugar-free day', type: 'negative', icon: '🍬', color: 'red' }
+    ];
+  } else {
+    return [
+      { name: '10 bet kitob o\'qish', type: 'positive', icon: '📚', color: 'blue', targetValue: 10, unit: 'bet' },
+      { name: 'Shakarsiz kun', type: 'negative', icon: '🍬', color: 'red' }
+    ];
+  }
+}
+
 // --- USER & INIT ---
 router.post('/init', async (req, res) => {
   try {
@@ -32,15 +54,13 @@ router.post('/init', async (req, res) => {
           telegramId: strTelegramId,
           name: [firstName, lastName].filter(Boolean).join(' '),
           language: languageCode === 'ru' ? 'ru' : (languageCode === 'en' ? 'en' : 'uz'),
+          isPremium: true, // Premium is free for everyone
         },
         include: { habits: true, tasks: true, dailyPlans: true }
       });
 
-      // Add default habits for new user
-      const defaultHabits = [
-        { name: '10 bet kitob o‘qish', type: 'positive', icon: '📚', color: 'blue', targetValue: 10, unit: 'bet' },
-        { name: 'Shakarsiz kun', type: 'negative', icon: '🍬', color: 'red' }
-      ];
+      // Add default habits for new user based on language
+      const defaultHabits = getDefaultHabits(languageCode || 'uz');
 
       for (const h of defaultHabits) {
         await prisma.habit.create({
@@ -317,4 +337,3 @@ router.get('/admin/stats', async (req, res) => {
 });
 
 export default router;
-

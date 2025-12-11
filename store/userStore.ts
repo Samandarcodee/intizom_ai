@@ -21,7 +21,7 @@ interface UserState {
   initFromTelegram: () => void;
 }
 
-const INITIAL_STATUS: UserStatus = { isPremium: false, installDate: Date.now() };
+const INITIAL_STATUS: UserStatus = { isPremium: true, installDate: Date.now() };
 const INITIAL_PROFILE: UserProfile = { 
   name: 'Foydalanuvchi', 
   goal: '', 
@@ -43,9 +43,8 @@ export const useUserStore = create<UserState>()(
         const diffTime = Math.abs(Date.now() - status.installDate);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        const isExpired = !status.isPremium && diffDays > 7;
-
-        set({ daysUsed: diffDays, showPaywall: isExpired });
+        // Premium is always enabled - no paywall needed
+        set({ daysUsed: diffDays, showPaywall: false });
       },
 
       upgradeToPremium: () => {
@@ -130,7 +129,7 @@ export const useUserStore = create<UserState>()(
               userData.dailyPlans || []
             );
 
-            // Update User Store with DB data
+            // Update User Store with DB data - Premium always enabled
             set((state) => ({
               userProfile: { 
                 ...state.userProfile, 
@@ -140,7 +139,7 @@ export const useUserStore = create<UserState>()(
               },
               userStatus: {
                 ...state.userStatus,
-                isPremium: userData.isPremium || state.userStatus.isPremium
+                isPremium: true // Premium always enabled for all users
               }
             }));
           }
