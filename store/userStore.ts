@@ -1,9 +1,11 @@
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 import { UserStatus, UserProfile } from '../types';
 import { getTelegramUser, getTelegramLanguage, isTelegramWebApp } from '../utils/telegram';
 import { useHabitStore } from './habitStore';
+import { useChatStore } from './chatStore';
+import { createTelegramScopedJSONStorage } from '../utils/scopedStorage';
 
 interface UserState {
   userStatus: UserStatus;
@@ -126,8 +128,9 @@ export const useUserStore = create<UserState>()(
             daysUsed: 1,
             showPaywall: false
           });
-          // Also clear habit store
+          // Also clear other persisted stores for previous user (UI is not persisted)
           useHabitStore.getState().syncData([], [], []);
+          useChatStore.getState().clearHistory();
         } else {
           // Set telegramId if not set
           set({ telegramId: newTelegramId });
@@ -206,7 +209,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'user-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createTelegramScopedJSONStorage(),
       partialize: (state) => ({ 
         userStatus: state.userStatus,
         userProfile: state.userProfile,
