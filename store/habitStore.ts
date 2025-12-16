@@ -78,10 +78,18 @@ export const useHabitStore = create<HabitState>()(
 
         // API Call
         try {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (!tgUser) {
+            console.error('Telegram user not found');
+            return;
+          }
+
           await fetch(`/api/habits/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              telegramId: tgUser.id,
               completedToday: newCompleted,
               streak: newStreak,
               currentValue: newVal,
@@ -124,10 +132,17 @@ export const useHabitStore = create<HabitState>()(
 
         // API Call
         try {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (!tgUser) {
+            console.error('Telegram user not found');
+            return;
+          }
+
           await fetch(`/api/tasks/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ completed: newCompleted })
+            body: JSON.stringify({ telegramId: tgUser.id, completed: newCompleted })
           });
         } catch (error) {
           console.error('Failed to toggle task:', error);
@@ -187,10 +202,17 @@ export const useHabitStore = create<HabitState>()(
 
         // API Call
         try {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (!tgUser) {
+            console.error('Telegram user not found');
+            return;
+          }
+
           await fetch(`/api/habits/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
+            body: JSON.stringify({ telegramId: tgUser.id, name })
           });
         } catch (error) {
           console.error('Failed to update habit:', error);
@@ -204,7 +226,14 @@ export const useHabitStore = create<HabitState>()(
 
         // API Call
         try {
-          await fetch(`/api/habits/${id}`, {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (!tgUser) {
+            console.error('Telegram user not found');
+            return;
+          }
+
+          await fetch(`/api/habits/${id}?telegramId=${tgUser.id}`, {
             method: 'DELETE'
           });
         } catch (error) {
@@ -254,7 +283,14 @@ export const useHabitStore = create<HabitState>()(
         }));
 
         try {
-          await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (!tgUser) {
+            console.error('Telegram user not found');
+            return;
+          }
+
+          await fetch(`/api/tasks/${id}?telegramId=${tgUser.id}`, { method: 'DELETE' });
         } catch (error) {
           console.error('Failed to delete task:', error);
         }

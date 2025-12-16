@@ -8,6 +8,7 @@ interface ChatState {
   // Actions
   addMessage: (message: ChatMessage) => void;
   clearHistory: () => void;
+  loadHistory: (telegramId: string) => Promise<void>;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -41,7 +42,19 @@ export const useChatStore = create<ChatState>()(
         }
       },
 
-      clearHistory: () => set({ history: [] })
+      clearHistory: () => set({ history: [] }),
+
+      loadHistory: async (telegramId: string) => {
+        try {
+          const response = await fetch(`/api/chat/${telegramId}`);
+          if (response.ok) {
+            const serverHistory = await response.json();
+            set({ history: serverHistory });
+          }
+        } catch (error) {
+          console.error('Failed to load chat history:', error);
+        }
+      }
     }),
     {
       name: 'chat-storage',

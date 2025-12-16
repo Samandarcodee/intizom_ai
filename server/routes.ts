@@ -157,18 +157,37 @@ router.post('/habits', async (req, res) => {
 router.put('/habits/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body; // partial updates
+    const { telegramId, ...updates } = req.body; // partial updates
+    
+    if (!telegramId) {
+      return res.status(400).json({ error: 'telegramId is required' });
+    }
+
+    // Find user first
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify habit belongs to user
+    const habit = await prisma.habit.findFirst({
+      where: { id, userId: user.id }
+    });
+    
+    if (!habit) {
+      return res.status(403).json({ error: 'Habit not found or access denied' });
+    }
     
     // Remove sensitive/readonly fields from updates
     delete updates.id;
     delete updates.userId;
     delete updates.createdAt;
 
-    const habit = await prisma.habit.update({
+    const updatedHabit = await prisma.habit.update({
       where: { id },
       data: updates
     });
-    res.json(habit);
+    res.json(updatedHabit);
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }
@@ -178,6 +197,27 @@ router.put('/habits/:id', async (req, res) => {
 router.delete('/habits/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const { telegramId } = req.query;
+    
+    if (!telegramId) {
+      return res.status(400).json({ error: 'telegramId is required' });
+    }
+
+    // Find user first
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify habit belongs to user
+    const habit = await prisma.habit.findFirst({
+      where: { id, userId: user.id }
+    });
+    
+    if (!habit) {
+      return res.status(403).json({ error: 'Habit not found or access denied' });
+    }
+
     await prisma.habit.delete({ where: { id } });
     res.json({ success: true });
   } catch (e) {
@@ -211,12 +251,32 @@ router.post('/tasks', async (req, res) => {
 router.put('/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
-    const task = await prisma.task.update({
+    const { telegramId, ...updates } = req.body;
+    
+    if (!telegramId) {
+      return res.status(400).json({ error: 'telegramId is required' });
+    }
+
+    // Find user first
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify task belongs to user
+    const task = await prisma.task.findFirst({
+      where: { id, userId: user.id }
+    });
+    
+    if (!task) {
+      return res.status(403).json({ error: 'Task not found or access denied' });
+    }
+
+    const updatedTask = await prisma.task.update({
       where: { id },
       data: updates
     });
-    res.json(task);
+    res.json(updatedTask);
   } catch (e) {
     res.status(500).json({ error: String(e) });
   }
@@ -226,6 +286,27 @@ router.put('/tasks/:id', async (req, res) => {
 router.delete('/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const { telegramId } = req.query;
+    
+    if (!telegramId) {
+      return res.status(400).json({ error: 'telegramId is required' });
+    }
+
+    // Find user first
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify task belongs to user
+    const task = await prisma.task.findFirst({
+      where: { id, userId: user.id }
+    });
+    
+    if (!task) {
+      return res.status(403).json({ error: 'Task not found or access denied' });
+    }
+
     await prisma.task.delete({ where: { id } });
     res.json({ success: true });
   } catch (e) {
