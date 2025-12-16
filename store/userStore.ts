@@ -103,6 +103,11 @@ export const useUserStore = create<UserState>()(
         // Check if different user - clear old data!
         if (currentTelegramId && currentTelegramId !== newTelegramId) {
           console.log(`🔄 User changed from ${currentTelegramId} to ${newTelegramId}, clearing old data...`);
+          
+          // Clear all user-specific localStorage data
+          localStorage.removeItem('habit-storage');
+          localStorage.removeItem('chat-storage');
+          
           // Reset to initial state for new user
           set({
             userStatus: INITIAL_STATUS,
@@ -111,8 +116,13 @@ export const useUserStore = create<UserState>()(
             daysUsed: 1,
             showPaywall: false
           });
+          
           // Also clear habit store
           useHabitStore.getState().syncData([], [], []);
+          
+          // Clear chat store
+          const { useChatStore } = await import('./chatStore');
+          useChatStore.getState().clearHistory();
         } else {
           // Set telegramId if not set
           set({ telegramId: newTelegramId });
@@ -167,6 +177,10 @@ export const useUserStore = create<UserState>()(
               userData.tasks || [], 
               userData.dailyPlans || []
             );
+
+            // Load chat history from server
+            const { useChatStore } = await import('./chatStore');
+            await useChatStore.getState().loadHistory(newTelegramId);
 
             // Update User Store with DB data - Premium always enabled
             set((state) => ({
