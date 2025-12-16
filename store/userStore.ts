@@ -97,6 +97,21 @@ export const useUserStore = create<UserState>()(
           return;
         }
 
+        // Security: Check if data is fresh (prevent shared link issues)
+        // If users share a link with #tgWebAppData, others might log in as them.
+        // Telegram links expire, but we can enforce it strictly.
+        const webApp = window.Telegram?.WebApp;
+        if (webApp?.initDataUnsafe?.auth_date) {
+          const authDate = webApp.initDataUnsafe.auth_date;
+          const now = Math.floor(Date.now() / 1000);
+          
+          // If data is older than 24 hours
+          if (now - authDate > 86400) {
+            console.warn('⚠️ Telegram data is too old. Potential shared link usage.');
+            return;
+          }
+        }
+
         const currentTelegramId = get().telegramId;
         const newTelegramId = String(tgUser.id);
         

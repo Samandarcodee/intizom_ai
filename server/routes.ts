@@ -30,8 +30,9 @@ router.post('/init', async (req, res) => {
   try {
     const { telegramId, firstName, lastName, username, languageCode } = req.body;
     
-    if (!telegramId) {
-      return res.status(400).json({ error: 'telegramId is required' });
+    // Strict validation
+    if (!telegramId || String(telegramId) === 'undefined' || String(telegramId) === 'null') {
+      return res.status(400).json({ error: 'Valid telegramId is required' });
     }
 
     const strTelegramId = String(telegramId);

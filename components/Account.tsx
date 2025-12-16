@@ -10,7 +10,7 @@ import {
 import { translations, Language } from '../utils/translations';
 
 export const Account: React.FC = () => {
-  const { userProfile, userStatus, daysUsed, updateProfile, resetData } = useUserStore();
+  const { userProfile, userStatus, daysUsed, updateProfile, resetData, telegramId } = useUserStore();
   const { habits } = useHabitStore();
   const { addToast } = useUIStore();
   const t = translations[userProfile.language].account;
@@ -209,7 +209,10 @@ export const Account: React.FC = () => {
       </button>
       
       <div className="text-center mt-6 mb-4">
-         <p className="text-[10px] text-gray-600">AI-INTIZOM v1.4.0</p>
+         <p className="text-[10px] text-gray-600">
+           AI-INTIZOM v1.4.1
+           {telegramId && <span className="block text-[9px] opacity-50">ID: {telegramId}</span>}
+         </p>
       </div>
     </div>
   );
