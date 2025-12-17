@@ -93,7 +93,9 @@ export const useHabitStore = create<HabitState>()(
         }
       },
 
-      setPlan: (plan) => set((state) => {
+      setPlan: async (plan) => {
+        // Update local state first
+        const state = get();
         let newTasks = [...state.todayTasks];
         
         if (newTasks.length === 0 && plan.length > 0) {
@@ -106,8 +108,28 @@ export const useHabitStore = create<HabitState>()(
             }));
           }
         }
-        return { dailyPlan: plan, todayTasks: newTasks };
-      }),
+        
+        set({ dailyPlan: plan, todayTasks: newTasks });
+
+        // Save to server
+        try {
+          const { getTelegramUser } = await import('../utils/telegram');
+          const tgUser = getTelegramUser();
+          if (tgUser && plan.length > 0) {
+            await fetch('/api/plans', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                telegramId: tgUser.id,
+                plans: plan
+              })
+            });
+            console.log('✅ Daily plans saved to server');
+          }
+        } catch (error) {
+          console.error('Failed to save plans:', error);
+        }
+      },
 
       toggleTask: async (id) => {
         const state = get();

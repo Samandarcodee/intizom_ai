@@ -126,6 +126,34 @@ router.post('/user/onboarding', async (req, res) => {
   }
 });
 
+// Update user profile
+router.post('/user/profile', async (req, res) => {
+  try {
+    const { telegramId, name, goal, language, notificationsEnabled } = req.body;
+    
+    if (!telegramId) {
+      return res.status(400).json({ error: 'telegramId is required' });
+    }
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (goal !== undefined) updateData.goal = goal;
+    if (language !== undefined) updateData.language = language;
+    if (notificationsEnabled !== undefined) updateData.notificationsEnabled = notificationsEnabled;
+
+    const user = await prisma.user.update({
+      where: { telegramId: String(telegramId) },
+      data: updateData
+    });
+
+    console.log(`✅ Profile updated for user ${telegramId}:`, updateData);
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // --- HABITS ---
 
 // Create Habit
@@ -230,6 +258,47 @@ router.delete('/tasks/:id', async (req, res) => {
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: String(e) });
+  }
+});
+
+// --- DAILY PLANS ---
+
+// Save/Update Daily Plans
+router.post('/plans', async (req, res) => {
+  try {
+    const { telegramId, plans } = req.body;
+    
+    if (!telegramId) {
+      return res.status(400).json({ error: 'telegramId is required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Delete old plans and create new ones
+    await prisma.dailyPlan.deleteMany({ where: { userId: user.id } });
+    
+    if (plans && plans.length > 0) {
+      await prisma.dailyPlan.createMany({
+        data: plans.map((plan: any) => ({
+          userId: user.id,
+          day: plan.day,
+          focus: plan.focus || '',
+          tasks: plan.tasks || []
+        }))
+      });
+    }
+
+    const savedPlans = await prisma.dailyPlan.findMany({
+      where: { userId: user.id },
+      orderBy: { day: 'asc' }
+    });
+
+    console.log(`✅ Daily plans saved for user ${telegramId}: ${savedPlans.length} plans`);
+    res.json(savedPlans);
+  } catch (error) {
+    console.error('Save plans error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
