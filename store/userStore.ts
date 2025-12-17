@@ -22,6 +22,20 @@ interface UserState {
   initFromTelegram: () => void;
 }
 
+// Helper: Clear ALL old localStorage to prevent data mixing
+function clearOldUserData(newTelegramId: string) {
+  const storedId = localStorage.getItem('current-telegram-id');
+  
+  if (storedId && storedId !== newTelegramId) {
+    console.log(`🧹 Different user detected (${storedId} -> ${newTelegramId}). Clearing ALL old data...`);
+    // Clear everything
+    localStorage.clear();
+  }
+  
+  // Always set current user ID
+  localStorage.setItem('current-telegram-id', newTelegramId);
+}
+
 const INITIAL_STATUS: UserStatus = { isPremium: true, installDate: Date.now() };
 const INITIAL_PROFILE: UserProfile = { 
   name: 'Foydalanuvchi', 
@@ -97,9 +111,13 @@ export const useUserStore = create<UserState>()(
           return;
         }
 
+        const newTelegramId = String(tgUser.id);
+        
+        // CRITICAL: Clear old user's localStorage if different user!
+        // This MUST happen FIRST before any other operations
+        clearOldUserData(newTelegramId);
+
         // Security: Check if data is fresh (prevent shared link issues)
-        // If users share a link with #tgWebAppData, others might log in as them.
-        // Telegram links expire, but we can enforce it strictly.
         const webApp = window.Telegram?.WebApp;
         if (webApp?.initDataUnsafe?.auth_date) {
           const authDate = webApp.initDataUnsafe.auth_date;
@@ -113,11 +131,10 @@ export const useUserStore = create<UserState>()(
         }
 
         const currentTelegramId = get().telegramId;
-        const newTelegramId = String(tgUser.id);
         
-        // Check if different user - clear old data!
-        if (currentTelegramId && currentTelegramId !== newTelegramId) {
-          console.log(`🔄 User changed from ${currentTelegramId} to ${newTelegramId}, clearing old data...`);
+        // Check if different user OR first time - reset local state
+        if (!currentTelegramId || currentTelegramId !== newTelegramId) {
+          console.log(`🔄 Setting user: ${newTelegramId} (was: ${currentTelegramId || 'none'})`);
           // Reset to initial state for new user
           set({
             userStatus: INITIAL_STATUS,
@@ -128,9 +145,6 @@ export const useUserStore = create<UserState>()(
           });
           // Also clear habit store
           useHabitStore.getState().syncData([], [], []);
-        } else {
-          // Set telegramId if not set
-          set({ telegramId: newTelegramId });
         }
 
         const currentProfile = get().userProfile;

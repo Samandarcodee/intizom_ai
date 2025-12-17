@@ -210,7 +210,7 @@ export const Account: React.FC = () => {
       
       <div className="text-center mt-6 mb-4">
          <p className="text-[10px] text-gray-600">
-           AI-INTIZOM v1.4.1
+           AI-INTIZOM v1.5.0
            {telegramId && <span className="block text-[9px] opacity-50">ID: {telegramId}</span>}
          </p>
       </div>
