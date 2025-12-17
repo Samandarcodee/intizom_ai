@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ChatMessage } from '../types';
+import { createUserStorage } from '../utils/userStorage';
 
 interface ChatState {
   history: ChatMessage[];
@@ -45,7 +46,7 @@ export const useChatStore = create<ChatState>()(
     }),
     {
       name: 'chat-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createUserStorage('chat-storage')),
     }
   )
 );

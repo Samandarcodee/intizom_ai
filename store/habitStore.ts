@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Habit, Task, DailyPlan } from '../types';
+import { createUserStorage } from '../utils/userStorage';
 
 interface HabitState {
   habits: Habit[];
@@ -310,7 +311,7 @@ export const useHabitStore = create<HabitState>()(
     }),
     {
       name: 'habit-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createUserStorage('habit-storage')),
     }
   )
 );
