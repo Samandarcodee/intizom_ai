@@ -15,6 +15,7 @@ import { FocusTimer } from './components/FocusTimer';
 import { useUserStore } from './store/userStore';
 import { useHabitStore } from './store/habitStore';
 import { initTelegramWebApp } from './utils/telegram';
+import { cleanupOldStorage } from './utils/userStorage';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.DASHBOARD);
@@ -24,6 +25,11 @@ const App: React.FC = () => {
 
   // Init Telegram WebApp and User Logic
   useEffect(() => {
+    // CRITICAL: Clean up old generic storage keys FIRST (fixes user data isolation issue)
+    // This removes old 'user-storage', 'habit-storage', 'chat-storage' keys
+    // that were shared between all users before this fix
+    cleanupOldStorage();
+    
     // Initialize Telegram WebApp if available
     initTelegramWebApp();
     

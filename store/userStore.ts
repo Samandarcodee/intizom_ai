@@ -4,6 +4,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { UserStatus, UserProfile } from '../types';
 import { getTelegramUser, getTelegramLanguage, isTelegramWebApp } from '../utils/telegram';
 import { useHabitStore } from './habitStore';
+import { useChatStore } from './chatStore';
+import { createUserStorage, cleanupOldStorage, clearAllAppStorage } from '../utils/userStorage';
 
 interface UserState {
   userStatus: UserStatus;
@@ -115,9 +117,16 @@ export const useUserStore = create<UserState>()(
         const currentTelegramId = get().telegramId;
         const newTelegramId = String(tgUser.id);
         
-        // Check if different user - clear old data!
+        // CRITICAL: Clean up old generic storage keys (from before user isolation fix)
+        cleanupOldStorage();
+        
+        // Check if different user - clear ALL data for clean slate!
         if (currentTelegramId && currentTelegramId !== newTelegramId) {
-          console.log(`🔄 User changed from ${currentTelegramId} to ${newTelegramId}, clearing old data...`);
+          console.log(`🔄 User changed from ${currentTelegramId} to ${newTelegramId}, clearing ALL old data...`);
+          
+          // Clear ALL app storage to prevent data leaks
+          clearAllAppStorage();
+          
           // Reset to initial state for new user
           set({
             userStatus: INITIAL_STATUS,
@@ -126,8 +135,10 @@ export const useUserStore = create<UserState>()(
             daysUsed: 1,
             showPaywall: false
           });
-          // Also clear habit store
+          
+          // Also clear habit store and chat store
           useHabitStore.getState().syncData([], [], []);
+          useChatStore.getState().clearHistory();
         } else {
           // Set telegramId if not set
           set({ telegramId: newTelegramId });
@@ -182,6 +193,25 @@ export const useUserStore = create<UserState>()(
               userData.tasks || [], 
               userData.dailyPlans || []
             );
+            
+            // Also sync chat history from server
+            try {
+              const chatResponse = await fetch(`/api/chat/${tgUser.id}`);
+              if (chatResponse.ok) {
+                const chatHistory = await chatResponse.json();
+                if (Array.isArray(chatHistory) && chatHistory.length > 0) {
+                  // Convert server format to local format
+                  const messages = chatHistory.map((msg: any) => ({
+                    role: msg.role as 'user' | 'model',
+                    text: msg.text,
+                    timestamp: new Date(msg.timestamp).getTime()
+                  }));
+                  useChatStore.setState({ history: messages });
+                }
+              }
+            } catch (chatError) {
+              console.error('Failed to sync chat history:', chatError);
+            }
 
             // Update User Store with DB data - Premium always enabled
             set((state) => ({
@@ -206,7 +236,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'user-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createUserStorage('user-storage')),
       partialize: (state) => ({ 
         userStatus: state.userStatus,
         userProfile: state.userProfile,
